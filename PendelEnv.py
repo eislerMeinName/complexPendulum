@@ -202,7 +202,7 @@ class ComplexPendulum(gym.Env):
                 The action.
 
         Return:
-            a: float
+            pwm: float
                 The action transformed to pwm.
             force: float
                 The applied force u.
@@ -210,12 +210,28 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1)@state.T)[0, 0]
-        a = np.clip(a, -0.5, 0.5)
-        force = a * self.params[7]
+
+
+        a_fric = a + np.sign(a) * self.params[8]
+        pwm = a_fric / self.params[7]
+
+        pwm = np.clip(pwm, -0.5, 0.5)
+
+        #Rail Limmiter ???
+        lim1 = 1 if self.state[0] >= 0.75 else 0
+        lim2 = 1 if self.state[0] <= 0.75 else 0
+        lim = lim1 * 3 * (self.state[0] - 0.75) + lim2 * 3 * (self.state[0] + 0.75)
+        #print(lim)
+
+        #pwm = np.clip(pwm - lim, -0.5, 0.5)
+
+        #pwm to effecitve force
+
+        force = pwm * self.params[7]
         if abs(force) < self.params[8] and (self.state[1] != 0 or self.state[3] != 0):
             force = 0
 
-        return a, force - np.sign(self.state[1]) * self.params[8]
+        return pwm, force - np.sign(self.state[1]) * self.params[8]
 
     def render(self):
         """Render the current state of the Pendulum as Pygame."""

@@ -8,7 +8,7 @@ import time
 if __name__ == "__main__":
     Q = np.eye(4)
     #Q[0, 0] = 10
-    env = ComplexPendulum(100, 5, "params.xml", Q, np.eye(1), True, actiontype=ActionType.GAIN, s0=np.array([-0.9, 0, np.pi/8, 0]), friction=True)
+    env = ComplexPendulum(100, 30, "params.xml", Q, np.eye(1), True, actiontype=ActionType.GAIN, s0=np.array([-0.2, 0, np.pi/8, 0]), friction=True)
     agent = LQAgent(env)
     state = env.reset()
     done = False
