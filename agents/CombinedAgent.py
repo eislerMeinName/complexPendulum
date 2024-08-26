@@ -1,22 +1,45 @@
 import numpy as np
-from PendelEnv import ComplexPendulum
 from assets.EnvTypes import ActionType, ActionTypeError
-from ProportionalAgent import ProportionalAgent
+from agents.ProportionalAgent import ProportionalAgent
+from agents.SwingUpAgent import SwingUpAgent
 
 
 class CombinedAgent:
+    """Implements an Agent consisting of a swing-up and proportional controller."""
 
-    def __init__(self, agent1: tuple, agent2: ProportionalAgent, env: ComplexPendulum) -> None:
-        if env.actiontype is ActionType.GAIN:
-            raise ActionTypeError([env.actiontype], [ActionType.DIRECT], 'Environment has wrong actiontype.')
+    def __init__(self, agent1: SwingUpAgent, agent2: ProportionalAgent) -> None:
+        """
+        Initialization:
 
-        self.a1, self.min1, self.max1 = agent1
+        Input:
+            agent1: SwingUpAgent
+                The swing-up controller.
+            agent2: ProportionalAgent
+                The proportional controller.
+        """
+
+        if agent1.env.actiontype is ActionType.GAIN:
+            raise ActionTypeError([agent1.env.actiontype], [ActionType.DIRECT], 'Environment has wrong actiontype.')
+
+        self.a1 = agent1
+        self.min1 = agent1.min
+        self.max1 = agent1.max
         self.a2 = agent2
 
     def sample(self, state: np.array) -> np.array:
-        if self.min1 < state[2] < self.max1:
+        """Samples the action (Direct PWM) based on the current state.
+        Input:
+            state: np.array
+                The current state.
+
+        Return:
+            pwm: np.array
+                The action applied as pwm.
+        """
+
+        if not self.min1 < state[2] < self.max1:
             return self.a1.sample(state)
         else:
             K = self.a2.sample(state)
             s = state.reshape(1, -1).copy()
-            return np.array([-(K.reshape(1, -1)@state.T)[0, 0]])
+            return np.array([-(K.reshape(1, -1)@s.T)[0, 0]])

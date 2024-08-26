@@ -76,7 +76,7 @@ class ComplexPendulum(gym.Env):
         self.deltat = 1 / frequency / self.solvesteps
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
-        self.s0 = s0.copy()
+        self.s0 = None if s0 is None else s0.copy()
 
         self.actiontype = actiontype
         self.rewardtype = rewardtype
@@ -101,7 +101,7 @@ class ComplexPendulum(gym.Env):
     def sampleS0(self) -> np.array:
         """Samples a random starting state with random X and θ."""
 
-        return np.array([2*np.random.rand()-1, 0, 2*np.pi*np.random.rand()-np.pi, 0], dtype=np.float32)
+        return np.array([np.random.rand()-0.5, 0, 2*np.pi*(np.random.rand()-0.5), 0], dtype=np.float32)
 
     def reward(self, u: float) -> float:
         """The reward function.
