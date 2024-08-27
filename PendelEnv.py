@@ -35,6 +35,7 @@ class ComplexPendulum(gym.Env):
                  rewardtype: RewardType = RewardType.LQ,
                  s0: np.array = None,
                  friction: bool = True,
+                 log: bool = True
                  ) -> None:
 
         """
@@ -60,6 +61,8 @@ class ComplexPendulum(gym.Env):
                 The starting state indicating random sampling or fixed starting state.
             friction: bool = True
                 Use friction during simulation.
+            log: bool = True
+                Use logger.
         """
         
         self.frequency = frequency
@@ -72,7 +75,7 @@ class ComplexPendulum(gym.Env):
 
         self.Q = Q
         self.R = R
-        self.solvesteps = 100
+        self.solvesteps = 10
         self.deltat = 1 / frequency / self.solvesteps
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
@@ -87,15 +90,17 @@ class ComplexPendulum(gym.Env):
             self.action_space: spaces = spaces.Box(low=-50*np.ones(4),
                                                    high=np.zeros(4))
 
-        self.observation_space: spaces = spaces.Box(low=-np.array([-1, -1, -np.pi, -1]),
-                                                    high=np.array([1, 1, np.pi, 1]))
+        self.observation_space: spaces = spaces.Box(low=-np.array([-1, -5, -np.pi, -15]),
+                                                    high=np.array([1, 5, np.pi, 15]))
         
         self.render_mode = "human"
         self.k = 100
         self.gui = gui
+        self.log = log
         if self.gui:
             self.screen = None
             self.screen_dim = 500
+        if self.log:
             self.logger = Logger(self.actiontype, self.state)
 
     def sampleS0(self) -> np.array:
@@ -190,7 +195,7 @@ class ComplexPendulum(gym.Env):
 
         rew = self.reward(u)
 
-        if self.gui:
+        if self.log:
             self.logger.log(self.time, self.state, pwm, u, a, rew)
 
         return self.state, rew, self.done(), {"answer": 42}
@@ -334,7 +339,8 @@ class ComplexPendulum(gym.Env):
 
         if self.gui:
             pygame.quit()
-        self.logger.show()
+        if self.log:
+            self.logger.show()
 
     def close(self) -> None:
         """Closes the environment."""

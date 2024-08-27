@@ -115,7 +115,7 @@ class Logger:
         axs[1, 0].set_xlabel('t [s]')
         axs[1, 0].set_ylabel('X' + dot + ' [m/s]')
         maxX = max(self.Xdot) if abs(max(self.Xdot)) >= abs(min(self.Xdot)) else min(self.Xdot)
-        axs[1, 0].set_ylim(-1.1*maxX, 1.1*maxX)
+        axs[1, 0].set_ylim(-1.1*abs(maxX), 1.1*abs(maxX))
 
         axs[2, 0].plot(self.Time, self.Theta, c='r')
         axs[2, 0].set_xlabel('t [s]')
@@ -126,7 +126,7 @@ class Logger:
         axs[3, 0].set_xlabel('t [s]')
         axs[3, 0].set_ylabel(r'$\dot{\theta}$ [m/s]')
         maxTheta = max(self.Thetadot) if abs(max(self.Thetadot)) >= abs(min(self.Thetadot)) else min(self.Thetadot)
-        axs[3, 0].set_ylim(-1.1 * maxTheta, 1.1 * maxTheta)
+        axs[3, 0].set_ylim(-1.1 * abs(maxTheta), 1.1 * abs(maxTheta))
 
         _ = self.Time.pop(0)
 
@@ -159,7 +159,7 @@ class Logger:
             axs[4, 1].plot(self.Time, self.pwm, c='g')
             axs[4, 1].set_xlabel('t [s]')
             axs[4, 1].set_ylabel('pwm')
-            axs[4, 1].set_ylim(-0.5, 0.5)
+            axs[4, 1].set_ylim(-0.7, 0.7)
 
             axs[4, 0].plot(self.Time, self.force, c='y')
             axs[4, 0].set_xlabel('t [s]')
@@ -173,7 +173,7 @@ class Logger:
             axs[1, 1].plot(self.Time, self.pwm, c='g')
             axs[1, 1].set_xlabel('t [s]')
             axs[1, 1].set_ylabel('pwm')
-            axs[1, 1].set_ylim(-0.5, 0.5)
+            axs[1, 1].set_ylim(-0.7, 0.7)
 
             axs[2, 1].plot(self.Time, self.force, c='y')
             axs[2, 1].set_xlabel('t [s]')
