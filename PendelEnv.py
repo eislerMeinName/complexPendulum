@@ -75,7 +75,7 @@ class ComplexPendulum(gym.Env):
 
         self.Q = Q
         self.R = R
-        self.solvesteps = 10
+        self.solvesteps = 825
         self.deltat = 1 / frequency / self.solvesteps
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
