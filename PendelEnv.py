@@ -9,11 +9,11 @@ import xml.etree.ElementTree as etxml
 import control as ct
 
 from assets.Logger import Logger
-from assets.EnvTypes import ActionType, RewardType
+from assets import ActionType, RewardType
 
 
 class ComplexPendulum(gym.Env):
-    """A basic RL environment that models a classic pendulum in different ways"""
+    """A basic RL environment that models a classic pendulum in different types."""
 
     metadata = {
         "render_modes": [
@@ -215,7 +215,6 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1)@state.T)[0, 0]
-
 
         a_fric = a + np.sign(a) * self.params[8]
         pwm = a_fric / self.params[7]
