@@ -1,5 +1,5 @@
 import numpy as np
-from assets.EnvTypes import ActionType
+from complexPendulum.assets import ActionType
 import matplotlib.pyplot as plt
 import pandas as pd
 

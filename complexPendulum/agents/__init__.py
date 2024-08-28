@@ -1,0 +1,4 @@
+from complexPendulum.agents.CombinedAgent import CombinedAgent
+from complexPendulum.agents.LQAgent import LQAgent
+from complexPendulum.agents.ProportionalAgent import ProportionalAgent
+from complexPendulum.agents.SwingUpAgent import SwingUpAgent

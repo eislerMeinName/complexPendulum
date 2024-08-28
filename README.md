@@ -19,9 +19,12 @@ For Arch Linux read [here](https://docs.anaconda.com/anaconda/install/linux/).
 
 ### complex-Pendulum
 ```bash
-$ git clone https://github.com/eislerMeinName/complexPendulum.git
-$ conda env create -f environment.yml
+$ conda env create -n complexPendulum python=3.10
 $ conda activate complexPendulum
+$ git clone https://github.com/eislerMeinName/complexPendulum.git
+$ cd complexPendulum/
+$ pip3 install --upgrade pip
+$ pip3 install -e .
 ```
 Then test installation via:
 ```bash
@@ -32,8 +35,14 @@ Now you should see a gui with a Pendulum swinging up to the unstable equilibrium
 
 ## Environment
 The ComplexPendulum environment is multimodal, and uses a logger class.
+An example of use can be found in test.py.
+
 ```python
->>> from PendelEnv import ComplexPendulum
+>>> import gymnasium as gym
+>>> env = gym.make('complexPendulum-v0')
+```
+Overview of Parameters:
+```python
 >>> env = ComplexPendulum(
 >>>     frequency: float,                               #control frequency
 >>>     episode_len: float,                             #episode length
@@ -46,7 +55,7 @@ The ComplexPendulum environment is multimodal, and uses a logger class.
 >>>     s0: np.array = None,                            #starting state
 >>>     friction: bool = True,                          #use static friction
 >>>     log: bool = True)                               #log step response
-````
+```
 ### XML-Parameter
 If you want to specify different kinematic parameters of a pendulum, edit params.xml file
 or write a new XML file as input to the environment.
@@ -65,29 +74,45 @@ or write a new XML file as input to the environment.
 
 ### ActionTypes
 The ActionType models the action of the agent.
-
-
-|  type  | dim |    explanation     |
-|:------:|:---:|:------------------:|
-| Direct |  1  | directly apply pwm |
-| Gain   |  4  |    apply gain      |
+- DIRECT: directly apply pwm (dim 1)
+- GAIN: apply proportional gain (dim 4)
 
 ### RewardTypes
 The RewardTypes specify the reward function of the environment.
-LQ models a linear quadratic reward function.
-EXP models an exponential reward function.
+- LQ models a linear quadratic reward function.
+- EXP models an exponential reward function.
 
 ### Logger
 The logger logs the current step response and may plot it using matplotlib.
 You can also write the data to a csv file.
 
-<img src="loggerexample.png">
+<img src="readme_images/loggerexample.png">
 
+## Agents
+Besides learning an agent via RL, there are a couple of classes containing agents based on classical control engineering.
+
+|    agent     |                          explanation                           | actiontype |
+|:------------:|:--------------------------------------------------------------:|:----------:|
+| proportional |           General interface for proportional agent.            |    GAIN    |
+|      lq      |            Agent based on linear quadratic control.            |    GAIN    |
+|   swing-up   | Agent used to swing up the pendulum by pumping energy into it. |   DIRECT   |
+|   combined   |       Combines a swing-up agent and a proportional agent       |   DIRECT   |
 
 ## Evaluator
+The evaluator class evaluates a logged step response on different response chunks,
+on undiscounted return evaluation-setups and classic step control loop performance requirements.
 
 ### EvaluationDataType
+EvaluationDataType is an enum showing which part of the data should be evaluated.
+- COMPLETE: The complete step response including swing-up.
+- SWING_UP: Only the swing-up.
+- STEP: Without swing-up.
 
 ### SetupType
+SetupType is an enum showing which reward function is used for the evaluation setup
+- LQR: Uses liner quadratic reward function.
+- EXP: Uses exponential reward function.
+- LIN: Uses linear reward function.
 
 ### EvalSetup
+Describes one evaluation setup: reward function (setupType), name; Q, R, k if needed

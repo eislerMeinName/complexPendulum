@@ -1,7 +1,7 @@
 import numpy as np
-from assets.EnvTypes import ActionType, ActionTypeError
-from agents.ProportionalAgent import ProportionalAgent
-from agents.SwingUpAgent import SwingUpAgent
+from complexPendulum.assets.EnvTypes import ActionType, ActionTypeError
+from complexPendulum.agents.ProportionalAgent import ProportionalAgent
+from complexPendulum.agents.SwingUpAgent import SwingUpAgent
 
 
 class CombinedAgent:

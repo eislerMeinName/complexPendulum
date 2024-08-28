@@ -1,5 +1,5 @@
 import numpy as np
-from PendelEnv import ComplexPendulum
+from complexPendulum.envs import ComplexPendulum
 
 
 class SwingUpAgent:
@@ -10,7 +10,7 @@ class SwingUpAgent:
                  kvw: float = 3, kem: float = 7,
                  eta: float = 1.05, E0: float = 0.05,
                  xmax: float = 0.4, vmax: float = 5,
-                 min: float = -0.25, max: float = 0.25) -> None:
+                 minAng: float = -0.25, maxAng: float = 0.25) -> None:
         """
         Initialization.
         Input:
@@ -19,22 +19,22 @@ class SwingUpAgent:
             ksu: float
                 The swing-up gain.
             kcw: float
-                The cart postion well gain.
+                The cart position well gain.
             kvw: float
                 The cart velocity well gain.
             kem: float
                 The energy maintenance gain.
             eta: float
-                The energy maintenance paramter.
+                The energy maintenance parameter.
             E0: float
                 The desired energy for the swing-up.
             xmax: float
                 Distance of cart position well from rail center.
             vmax: float
                 "Distance" of cart velocity well.
-            min: float
+            minAng: float
                 The min of the stabilization zone for switching to state feedback.
-            max: float
+            maxAng: float
                 The max of the stabilization zone for switching to state feedback.
         """
 
@@ -47,8 +47,8 @@ class SwingUpAgent:
         self.E0 = E0
         self.xmax = xmax
         self.vmax = vmax
-        self.min = min
-        self.max = max
+        self.min = minAng
+        self.max = maxAng
         self.mp, self.l, self.J, self.m, _, _, self.g, _, _ = env.params
 
     def sample(self, state: np.array) -> np.array:

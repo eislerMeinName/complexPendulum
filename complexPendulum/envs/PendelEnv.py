@@ -7,9 +7,9 @@ from gymnasium.core import ObsType
 from pygame import gfxdraw
 import xml.etree.ElementTree as etxml
 import control as ct
+from scipy.integrate import odeint
 
-from assets.Logger import Logger
-from assets import ActionType, RewardType
+from complexPendulum.assets import Logger, ActionType, RewardType
 
 
 class ComplexPendulum(gym.Env):
@@ -25,11 +25,11 @@ class ComplexPendulum(gym.Env):
     }
 
     def __init__(self,
-                 frequency: float, 
-                 episode_len: float,
-                 path: str, 
-                 Q: np.ndarray,
-                 R: np.ndarray,
+                 frequency: float = 100,
+                 episode_len: float = 15,
+                 path: str = 'params.xml',
+                 Q: np.ndarray = np.eye(4),
+                 R: np.ndarray = np.eye(1),
                  gui: bool = False,
                  actiontype: ActionType = ActionType.DIRECT,
                  rewardtype: RewardType = RewardType.LQ,
@@ -64,7 +64,7 @@ class ComplexPendulum(gym.Env):
             log: bool = True
                 Use logger.
         """
-        
+
         self.frequency = frequency
         self.episode_len = episode_len
         self.STEPS = episode_len * frequency
@@ -75,8 +75,7 @@ class ComplexPendulum(gym.Env):
 
         self.Q = Q
         self.R = R
-        self.solvesteps = 825
-        self.deltat = 1 / frequency / self.solvesteps
+        self.t = np.arange(0, 1 / frequency, 1e-5)
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
@@ -84,29 +83,32 @@ class ComplexPendulum(gym.Env):
         self.actiontype = actiontype
         self.rewardtype = rewardtype
         if actiontype == ActionType.DIRECT:
-            self.action_space: spaces = spaces.Box(low=-0.5*np.ones(1),
-                                                   high=0.5*np.ones(1))
+            self.action_space: spaces = spaces.Box(low=-0.5 * np.ones(1),
+                                                   high=0.5 * np.ones(1), dtype=np.float64)
         else:
-            self.action_space: spaces = spaces.Box(low=-50*np.ones(4),
-                                                   high=np.zeros(4))
+            self.action_space: spaces = spaces.Box(low=-50 * np.ones(4),
+                                                   high=np.zeros(4), dtype=np.float64)
 
-        self.observation_space: spaces = spaces.Box(low=-np.array([-1, -5, -np.pi, -15]),
-                                                    high=np.array([1, 5, np.pi, 15]))
-        
+        self.observation_space: spaces = spaces.Box(low=np.array([-1, -np.inf, -np.pi, -np.inf]),
+                                                    high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float64)
+
         self.render_mode = "human"
         self.k = 100
         self.gui = gui
         self.log = log
         if self.gui:
+            self.surf = None
             self.screen = None
             self.screen_dim = 500
+            self.render()
         if self.log:
             self.logger = Logger(self.actiontype, self.state)
 
-    def sampleS0(self) -> np.array:
+    @staticmethod
+    def sampleS0() -> np.array:
         """Samples a random starting state with random X and θ."""
 
-        return np.array([np.random.rand()-0.5, 0, 2*np.pi*(np.random.rand()-0.5), 0], dtype=np.float32)
+        return np.array([np.random.rand() - 0.5, 0, 2 * np.pi * (np.random.rand() - 0.5), 0], dtype=np.float32)
 
     def reward(self, u: float) -> float:
         """The reward function.
@@ -121,47 +123,58 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         constraint = -100 if abs(self.state[0] > 1) else 0
-        #cost = (state@self.Q@state.T + u*self.R*u)[0, 0]
         lq = -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.k + constraint
-        #state[0, 1] = 0
-        #state[0, 3] = 0
-        #dist = np.linalg.norm(state)
         expo = np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2
         return lq if self.rewardtype is RewardType.LQ else expo
 
-    def done(self) -> bool:
+    def done(self) -> tuple[bool, bool]:
         """Checks if simulation is finished.
         Return:
             done: bool
                 Simulation is finished.
         """
 
-        if self.STEPS == 0 or abs(self.state[0]) > 1:
-            return True
+        if self.STEPS == 0:
+            return True, False
+        if abs(self.state[0]) > 1:
+            return True, True
         self.STEPS -= 1
-        return False
+        return False, False
 
-    def intStep(self, F: float) -> None:
+    def intStepOde(self, state: np.array, t: float, F: float) -> np.array:
         """A single integration step of the nonlinear system dynamics.
         Input:
+            x: np.array
+                The current state.
+            t: float
+                The current time.
             F: float
                 The applied force u.
+
+        Return:
+            statedot: np.array
+                The differential of the state.
         """
 
-        x_dot_s = self.state[1]
-        theta_s = self.state[2]
-        theta_dot_s = self.state[3]
+        x_dot_s = state[1]
+        theta_s = state[2]
+        theta_dot_s = state[3]
+
         mp, l, J, m, fp, fc, g, _, _ = self.params
 
-        d = 1 - (mp**2 * l**2 / (J * m)) * np.cos(theta_s)**2
+        d = 1 - (mp ** 2 * l ** 2 / (J * m)) * np.cos(theta_s) ** 2
 
         x_dot = x_dot_s
-        x_ddot = F/m - mp*mp*l*l*g*np.sin(theta_s)*np.cos(theta_s) / (J*m) + mp*l*theta_dot_s*theta_dot_s*np.sin(theta_s)/m + mp*l*fp*theta_dot_s*np.cos(theta_s) / (J*m) - fc*x_dot_s/m
+        x_ddot = F / m - mp * mp * l * l * g * np.sin(theta_s) * np.cos(theta_s) / (
+                    J * m) + mp * l * theta_dot_s * theta_dot_s * np.sin(
+            theta_s) / m + mp * l * fp * theta_dot_s * np.cos(theta_s) / (J * m) - fc * x_dot_s / m
         theta_dot = theta_dot_s
-        theta_ddot = mp*l*g*np.sin(theta_s)/J - mp*l*F*np.cos(theta_s) / (J*m) - mp*mp*l*l*theta_dot_s*theta_dot_s*np.sin(theta_s)*np.cos(theta_s) / (J*m) + mp*l*fc*x_dot_s*np.cos(theta_s) / (J*m) - fp*theta_dot_s/J
-        self.state += self.deltat * np.array([x_dot, x_ddot/d, theta_dot, theta_ddot/d])
+        theta_ddot = mp * l * g * np.sin(theta_s) / J - mp * l * F * np.cos(theta_s) / (
+                    J * m) - mp * mp * l * l * theta_dot_s * theta_dot_s * np.sin(theta_s) * np.cos(theta_s) / (
+                                 J * m) + mp * l * fc * x_dot_s * np.cos(theta_s) / (J * m) - fp * theta_dot_s / J
+        return np.array([x_dot, x_ddot / d, theta_dot, theta_ddot / d])
 
-    def step(self, action: np.array) -> Tuple[np.array, float, bool, dict]:
+    def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
         """The step function simulates a single control step in the environment.
         Input:
             action: np.array
@@ -178,27 +191,26 @@ class ComplexPendulum(gym.Env):
                 The true answer.
         """
 
+        pwm, u = self.preprocessAction(action)
+        s = odeint(self.intStepOde, y0=self.state, t=self.t, args=(u,))
+        self.state = np.array(s[-1])
+
+        self.time += 1 / self.frequency
+        if self.state[2] > np.pi:
+            self.state[2] -= 2 * np.pi
+        elif self.state[2] < -np.pi:
+            self.state[2] += 2 * np.pi
+
+        rew = self.reward(u)
+        done, trun = self.done()
         if self.gui:
             self.render()
 
-        pwm, u = self.preprocessAction(action)
-        for _ in range(self.solvesteps):
-            self.intStep(u)
-
-        self.time += 1/self.frequency
-        if self.state[2] > np.pi:
-            self.state[2] -= 2*np.pi
-        elif self.state[2] < -np.pi:
-            self.state[2] += 2*np.pi
-
-        a = action if self.actiontype is ActionType.GAIN else action[0]
-
-        rew = self.reward(u)
-
         if self.log:
+            a = action if self.actiontype is ActionType.GAIN else action[0]
             self.logger.log(self.time, self.state, pwm, u, a, rew)
 
-        return self.state, rew, self.done(), {"answer": 42}
+        return self.state, rew, done, trun, {"answer": 42}
 
     def preprocessAction(self, a: np.array) -> tuple:
         """Preprocesses the action based on the actiontype.
@@ -214,22 +226,21 @@ class ComplexPendulum(gym.Env):
         """
 
         state = self.state.reshape(1, -1).copy()
-        a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1)@state.T)[0, 0]
+        a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ state.T)[0, 0]
 
         a_fric = a + np.sign(a) * self.params[8]
         pwm = a_fric / self.params[7]
 
         pwm = np.clip(pwm, -0.5, 0.5)
 
-        #Rail Limmiter ???
-        lim1 = 1 if self.state[0] >= 0.75 else 0
-        lim2 = 1 if self.state[0] <= 0.75 else 0
-        lim = lim1 * 3 * (self.state[0] - 0.75) + lim2 * 3 * (self.state[0] + 0.75)
-        #print(lim)
+        # Rail Limiter ???
+        # lim1 = 1 if self.state[0] >= 0.75 else 0
+        # lim2 = 1 if self.state[0] <= 0.75 else 0
+        # lim = lim1 * 3 * (self.state[0] - 0.75) + lim2 * 3 * (self.state[0] + 0.75)
+        # print(lim)
+        # pwm = np.clip(pwm - lim, -0.5, 0.5)
 
-        #pwm = np.clip(pwm - lim, -0.5, 0.5)
-
-        #pwm to effecitve force
+        # pwm to effective force
 
         force = pwm * self.params[7]
         if abs(force) < self.params[8] and (self.state[1] != 0 or self.state[3] != 0):
@@ -252,9 +263,7 @@ class ComplexPendulum(gym.Env):
             pygame.init()
             if self.render_mode == "human":
                 pygame.display.init()
-                self.screen = pygame.display.set_mode(size=
-                    (self.screen_dim, self.screen_dim)
-                )
+                self.screen = pygame.display.set_mode(size=(self.screen_dim, self.screen_dim))
             else:  # mode in "rgb_array"
                 self.screen = pygame.Surface((self.screen_dim, self.screen_dim))
 
@@ -263,7 +272,7 @@ class ComplexPendulum(gym.Env):
         self.pygamedrawPend()
         font = pygame.font.SysFont("comicsansms", 50)
 
-        text = font.render(str(int(self.time * 100)/100) + "s/" + str(self.episode_len) + "s", True, (0, 0, 0))
+        text = font.render(str(int(self.time * 100) / 100) + "s/" + str(self.episode_len) + "s", True, (0, 0, 0))
         self.screen.blit(self.surf, (0, 0))
         self.screen.blit(text, (0, 0))
 
@@ -274,10 +283,10 @@ class ComplexPendulum(gym.Env):
 
         size = [50, 10, 100]
         scale = (self.screen_dim - 200) / 2
-        OffsetX = self.state[0] * scale + self.screen_dim/2
-        OffsetY = self.screen_dim/2
+        OffsetX = self.state[0] * scale + self.screen_dim / 2
+        OffsetY = self.screen_dim / 2
 
-        pygame.draw.rect(self.surf, (0, 0, 200), (OffsetX - size[0]/2, OffsetY - size[1]/2, size[0], size[1]), 0)
+        pygame.draw.rect(self.surf, (0, 0, 200), (OffsetX - size[0] / 2, OffsetY - size[1] / 2, size[0], size[1]), 0)
 
         rodEndY = OffsetY - size[2] * np.cos(self.state[2])
         rodEndX = OffsetX + size[2] * np.sin(self.state[2])
@@ -288,7 +297,7 @@ class ComplexPendulum(gym.Env):
         coords = [(l, b), (l, t), (r, t), (r, b)]
         transformed_coords = []
         for c in coords:
-            c = pygame.math.Vector2(c).rotate_rad(self.state[2] - np.pi/2)
+            c = pygame.math.Vector2(c).rotate_rad(self.state[2] - np.pi / 2)
             c = (c[0] + OffsetX, c[1] + OffsetY)
             transformed_coords.append(c)
 
@@ -324,14 +333,14 @@ class ComplexPendulum(gym.Env):
         XML_TREE = etxml.parse(path).getroot()
         Fs = float(XML_TREE.attrib['Fs']) if self.friction else 0
         return float(XML_TREE.attrib['mp']), \
-               float(XML_TREE.attrib['l']), \
-               float(XML_TREE.attrib['J']), \
-               float(XML_TREE.attrib['m']), \
-               float(XML_TREE.attrib['fp']), \
-               float(XML_TREE.attrib['fc']), \
-               float(XML_TREE.attrib['g']), \
-               float(XML_TREE.attrib['M']), \
-               Fs
+            float(XML_TREE.attrib['l']), \
+            float(XML_TREE.attrib['J']), \
+            float(XML_TREE.attrib['m']), \
+            float(XML_TREE.attrib['fp']), \
+            float(XML_TREE.attrib['fc']), \
+            float(XML_TREE.attrib['g']), \
+            float(XML_TREE.attrib['M']), \
+            Fs
 
     def stats(self) -> None:
         """Shows the logged step response data."""
@@ -347,7 +356,7 @@ class ComplexPendulum(gym.Env):
         if self.gui:
             pygame.quit()
 
-    def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None,) -> tuple[ObsType, dict[str, Any]]:
+    def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None, ) -> tuple[ObsType, dict[str, Any]]:
         """Resets the environment.
         Return:
             state: np.array
@@ -362,7 +371,7 @@ class ComplexPendulum(gym.Env):
             self.screen = None
             self.logger.reset(self.state)
 
-        return self.state
+        return self.state, {'answer': 42}
 
     def getLinearSS(self) -> ct.ss:
         """Creates the linearized state space model of the pendulum with parsed parameters.
@@ -387,16 +396,3 @@ class ComplexPendulum(gym.Env):
         C = [[1, 0, 0, 0],
              [0, 0, 1, 0]]
         return ct.ss(A, B, C, np.zeros((2, 1)))
-
-
-if __name__ == "__main__":
-    Q = np.array([[0.1, 0, 0, 0], [0, 0.1, 0, 0], [0, 0, 1000, 0], [0, 0, 0, 0.1]])
-    env = ComplexPendulum(48, 2, "params.xml", Q, np.eye(1), True, rewardtype=RewardType.EXP)
-    #env2 = ComplexPendulum(48, 5, "params.xml", Q, np.eye(1), True, rewardtype=RewardType.EXP, s0=np.pi / 8)
-    done = False
-
-    while not done:
-        state, rew, done, _ = env.step(np.array([0]))
-
-    env.close()
-    env.stats()

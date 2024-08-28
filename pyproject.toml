@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "complexPendulum"
+version = "0.0.1"
+license = {file = "LICENSE.txt"}
+authors = [
+  { name="Johannes Tölle", email="johannes.toelle@gmx.net" },
+]
+description = "Complex-Pendulum is a detailed gym environment of the inverted pendulum RL environment. It aims at modelling real-world pendulum systems as accurate as possible."
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = ["pandas>=2.2.2", "numpy>=1.25.2", "gymnasium>=0.28.1", "matplotlib>=3.7.2",
+  "pygame>=2.5.0", "stable-baselines3>=1.5.0"]

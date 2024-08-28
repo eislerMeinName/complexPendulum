@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class RewardPlotter:
 
     def __init__(self, Q: list, R: list, k: float) -> None:
@@ -97,6 +98,7 @@ class RewardPlotter:
         axs[2].plot_surface(x, theta, np.array(rewards))
         axs[2].set_title("EXP reward 3")
 
+
 if __name__ == "__main__":
     q1 = np.eye(4)
     q1[2, 2] = 0.5
@@ -104,7 +106,7 @@ if __name__ == "__main__":
     q2[2, 2] = 0.1
     Q = [np.eye(4), q1, q2]
     plotter = RewardPlotter(Q, [np.eye(1), np.eye(1), np.eye(1)], 2)
-    #fig, axs = plt.subplots(2, 3, subplot_kw={'projection': '3d'})
+    # fig, axs = plt.subplots(2, 3, subplot_kw={'projection': '3d'})
     fig, ax = plt.subplots(1, 1, subplot_kw={'projection': '3d'})
-    plotter.plotSingleSurf(ax,"", plotter.EXPreturn, 2)
+    plotter.plotSingleSurf(ax, "", plotter.EXPreturn, 2)
     plt.show()

@@ -1,7 +1,9 @@
 import numpy as np
 
-from assets.EnvTypes import ActionType, RewardType
-from assets.EvalSetup import EvalSetup, SetupType, EvaluationDataType
+from complexPendulum.assets.EvalSetup import EvalSetup, SetupType, EvaluationDataType
+from complexPendulum.assets.EnvTypes import ActionType, RewardType, ActionTypeError
+from complexPendulum.assets.Logger import Logger
+from complexPendulum.assets.Evaluator import Evaluator
 
 Setup1 = EvalSetup(SetupType.LQR, "LQR 1", np.eye(4), np.eye(1), 200)
 Setup2 = EvalSetup(SetupType.LQR, "LQR 2",
