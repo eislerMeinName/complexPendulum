@@ -2,9 +2,7 @@
 Complex-Pendulum is a detailed gym environment of the inverted pendulum RL environment. 
 It aims at modelling real-world pendulum systems as accurate as possible.
 
-```
-Currently under construction.
-```
+> Currently under construction...
 
 ## Installation
 This repo was written using Python3.11 with conda on Arch Linux 
@@ -31,7 +29,10 @@ Then test installation via:
 $ python3 test.py
 ```
 Now you should see a gui with a Pendulum swinging up to the unstable equilibrium.
-
+You can easily evaluate this step response via:
+```bash
+$ python3 evaltest.py
+```
 
 ## Environment
 The ComplexPendulum environment is multimodal, and uses a logger class.
@@ -116,3 +117,10 @@ SetupType is an enum showing which reward function is used for the evaluation se
 
 ### EvalSetup
 Describes one evaluation setup: reward function (setupType), name; Q, R, k if needed
+
+## Learning Script
+
+## Evaluation Script
+
+> ## Citation
+> Nothing to cite, yet...

@@ -179,7 +179,6 @@ class Evaluator:
             if not xreached and ((self.states[i-1][0, 0] < 0 < state[0, 0]) or (state[0, 0] < 0 < self.states[i-1][0, 0])) and not i == 0:
                 xreached = True
             if not thetareached and ((self.states[i-1][0, 2] < 0 < state[0, 2]) or (state[0, 2] < 0 < self.states[i-1][0, 2])) and not i == 0:
-                print(i)
                 thetareached = True
 
             # peak time and overshoot
@@ -208,13 +207,13 @@ class Evaluator:
         self.data["X: Tm"] = self.Time[indexTmX]
         self.data['X: $Δh'] = hx
         self.data["X: Te"] = self.Time[indexTeX] if indexTeX is not None else None
-        self.data[r'X: $e(∞)$'] = eXinf
+        self.data[r'X: e∞'] = eXinf
 
         self.data['θ: Tr'] = self.Time[indexTrTheta]
         self.data['θ: Tm'] = self.Time[indexTmTheta]
         self.data['θ: Δh'] = htheta
         self.data['θ: Te'] = self.Time[indexTeTheta] if indexTeTheta is not None else None
-        self.data['θ: $e(∞)$'] = eThetainf
+        self.data['θ: e∞'] = eThetainf
 
         return self.data
 

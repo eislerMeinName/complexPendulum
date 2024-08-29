@@ -83,17 +83,17 @@ class ComplexPendulum(gym.Env):
         self.actiontype = actiontype
         self.rewardtype = rewardtype
         if actiontype == ActionType.DIRECT:
-            self.action_space: spaces = spaces.Box(low=-0.5 * np.ones(1),
-                                                   high=0.5 * np.ones(1), dtype=np.float64)
+            self.action_space: spaces = spaces.Box(low=-0.5*np.ones(1),
+                                                   high=0.5*np.ones(1), dtype=np.float32)
         else:
             self.action_space: spaces = spaces.Box(low=-50 * np.ones(4),
-                                                   high=np.zeros(4), dtype=np.float64)
+                                                   high=np.zeros(4), dtype=np.float32)
 
         self.observation_space: spaces = spaces.Box(low=np.array([-1, -np.inf, -np.pi, -np.inf]),
-                                                    high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float64)
+                                                    high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float32)
 
         self.render_mode = "human"
-        self.k = 100
+        self.k = 200
         self.gui = gui
         self.log = log
         if self.gui:
@@ -193,7 +193,7 @@ class ComplexPendulum(gym.Env):
 
         pwm, u = self.preprocessAction(action)
         s = odeint(self.intStepOde, y0=self.state, t=self.t, args=(u,))
-        self.state = np.array(s[-1])
+        self.state = np.array(s[-1], dtype=np.float32)
 
         self.time += 1 / self.frequency
         if self.state[2] > np.pi:

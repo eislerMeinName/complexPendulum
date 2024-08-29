@@ -13,5 +13,8 @@ description = "Complex-Pendulum is a detailed gym environment of the inverted pe
 readme = "README.md"
 requires-python = ">=3.10"
 
-dependencies = ["pandas>=2.2.2", "numpy>=1.25.2", "gymnasium>=0.28.1", "matplotlib>=3.7.2",
-  "pygame>=2.5.0", "stable-baselines3>=1.5.0"]
+dependencies = ["pandas>=2.2.2", "matplotlib>=3.7.2", "numpy==1.24.0", "scipy==1.10.0",
+  "pygame>=2.5.0", "stable-baselines3>=2.0.0", "control"]
+
+[tool.setuptools]
+py-modules = []
