@@ -3,15 +3,15 @@ import numpy as np
 from complexPendulum.agents import LQAgent, SwingUpAgent, CombinedAgent
 import time
 
-REALTIME: bool = False
+REALTIME: bool = True
 GUI: bool = True
-S0: np.array = np.array([-0.4, 0, -0.245, 0])
+S0: np.array = np.array([0, 0, np.pi, 0], dtype=np.float32)
 Q: np.array = np.eye(4)
 
 if __name__ == "__main__":
     env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=30)
-    lq = LQAgent(env)
-    swingup = SwingUpAgent(env)
+    lq = LQAgent(env.unwrapped)
+    swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 
     state, _ = env.reset()
@@ -22,11 +22,11 @@ if __name__ == "__main__":
         while time.time_ns()-t0 < 10000000 and REALTIME:
             pass
         t0 = time.time_ns()
-        action = agent.sample(state)
+        action = agent.predict(state)
         state, rew, done, _, _ = env.step(action)
 
     print(str(round(time.time() - t00, 5)) + 's')
 
-    env.stats()
-    env.logger.write('test.csv')
+    env.unwrapped.stats()
+    env.unwrapped.logger.write('test.csv')
     env.close()

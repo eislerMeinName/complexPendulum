@@ -35,7 +35,8 @@ class ComplexPendulum(gym.Env):
                  rewardtype: RewardType = RewardType.LQ,
                  s0: np.array = None,
                  friction: bool = True,
-                 log: bool = True
+                 log: bool = True,
+                 k: float = 200
                  ) -> None:
 
         """
@@ -63,6 +64,8 @@ class ComplexPendulum(gym.Env):
                 Use friction during simulation.
             log: bool = True
                 Use logger.
+            k: float = 200
+                Normalisation parameter for lq reward function.
         """
 
         self.frequency = frequency
@@ -93,7 +96,7 @@ class ComplexPendulum(gym.Env):
                                                     high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float32)
 
         self.render_mode = "human"
-        self.k = 200
+        self.k = k
         self.gui = gui
         self.log = log
         if self.gui:
@@ -122,7 +125,7 @@ class ComplexPendulum(gym.Env):
         """
 
         state = self.state.reshape(1, -1).copy()
-        constraint = -100 if abs(self.state[0] > 1) else 0
+        constraint = -1000 if abs(self.state[0] > 1) else 0
         lq = -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.k + constraint
         expo = np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2
         return lq if self.rewardtype is RewardType.LQ else expo

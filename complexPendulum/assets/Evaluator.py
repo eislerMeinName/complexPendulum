@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from complexPendulum.assets import EvalSetup, SetupType, EvaluationDataType
+from complexPendulum.assets import EvalSetup, SetupType, EvaluationDataType, bcolors
 
 
 def loadLog(path: str) -> tuple:
@@ -54,6 +54,7 @@ class Evaluator:
                 The parameters for determining the settling time (x, theta).
         """
 
+        print(bcolors.OKBLUE + f"Evaluating {datatype.name} \n" + bcolors.ENDC)
         self.logpath = logpath
         self.datatype = datatype
         self.Ts = 0
@@ -66,6 +67,8 @@ class Evaluator:
         _ = self.evalReturn()
         if datatype is EvaluationDataType.STEP:
             _ = self.evalStep()
+        if datatype is EvaluationDataType.SWING_UP:
+            _ = self.evalMaxima()
 
     def cutData(self, angle: float) -> None:
         """Cuts the data based on the EvaluationDataType and angle.
@@ -99,6 +102,20 @@ class Evaluator:
                     self.pwm = self.pwm[self.index:len(self.pwm)]
                     self.force = self.force[self.index:len(self.force)]
                     self.Time = self.Time[self.index:len(self.Time)]
+
+    def evalMaxima(self) -> dict:
+        """Evaluates the state maximas of swing up."""
+        X = [abs(s[0, 0]) for s in self.states]
+        Xdot = [abs(s[0, 1]) for s in self.states]
+        Theta = [abs(s[0, 2]) for s in self.states]
+        Thetadot = [abs(s[0, 3]) for s in self.states]
+        self.data['|X'] = max(X)
+        self.data['|X´|'] = max(Xdot)
+        self.data['|θ|'] = max(Theta)
+        self.data['|θ´|'] = max(Thetadot)
+        
+        return self.data
+
 
     def evalLQR(self, Q: np.array, R: np.array, k: float = 1) -> float:
         """Evaluates the log with undiscounted linear quadratic return.
@@ -205,9 +222,9 @@ class Evaluator:
         eThetainf = self.states[-1][0, 2]
         self.data["X: Tr"] = self.Time[indexTrX]
         self.data["X: Tm"] = self.Time[indexTmX]
-        self.data['X: $Δh'] = hx
+        self.data['X: Δh'] = hx
         self.data["X: Te"] = self.Time[indexTeX] if indexTeX is not None else None
-        self.data[r'X: e∞'] = eXinf
+        self.data['X: e∞'] = eXinf
 
         self.data['θ: Tr'] = self.Time[indexTrTheta]
         self.data['θ: Tm'] = self.Time[indexTmTheta]

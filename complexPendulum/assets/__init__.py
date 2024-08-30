@@ -3,10 +3,10 @@ import numpy as np
 from complexPendulum.assets.EvalSetup import EvalSetup, SetupType, EvaluationDataType
 from complexPendulum.assets.EnvTypes import ActionType, RewardType, ActionTypeError
 from complexPendulum.assets.Logger import Logger
-from complexPendulum.assets.Evaluator import Evaluator
 from complexPendulum.assets.colors import bcolors
+from complexPendulum.assets.Evaluator import Evaluator
 
-Setup1 = EvalSetup(SetupType.LQR, "LQR 1", np.eye(4), np.zeros(1), 200)
+Setup1 = EvalSetup(SetupType.LQR, "LQR 1", np.eye(4), np.eye(1), 200)
 Setup2 = EvalSetup(SetupType.LQR, "LQR 2",
                    np.eye(4), 0.5*np.eye(1), k=200)
 Setup3 = EvalSetup(SetupType.LQR, "LQR 3",

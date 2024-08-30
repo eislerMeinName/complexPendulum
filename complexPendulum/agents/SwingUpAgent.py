@@ -51,7 +51,7 @@ class SwingUpAgent:
         self.max = maxAng
         self.mp, self.l, self.J, self.m, _, _, self.g, _, _ = env.params
 
-    def sample(self, state: np.array) -> np.array:
+    def predict(self, state: np.array) -> np.array:
         """Samples the action (Direct PWM) based on the current state.
         Input:
             state: np.array

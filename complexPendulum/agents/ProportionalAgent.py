@@ -14,7 +14,7 @@ class ProportionalAgent:
 
         self.K = K
 
-    def sample(self, state: np.array) -> np.array:
+    def predict(self, state: np.array) -> np.array:
         """
         Sample function, that returns the control gain matrix.
         Input:
@@ -27,3 +27,4 @@ class ProportionalAgent:
         """
 
         return self.K
+

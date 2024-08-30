@@ -20,7 +20,7 @@ DEFAULT_EPISODE_LEN: float = 15
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
 DEFAULT_ACTIONTYPE: ActionType = ActionType.DIRECT
-DEFAULT_S0: np.array = np.array([0, 0, np.pi, 0])
+DEFAULT_S0: np.array = np.array([0, 0, 0.0000001, 0], dtype=np.float32)
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
 
@@ -35,16 +35,18 @@ def run(steps: int = DEFAULT_STEPS,
         friction: bool = DEFAULT_FRICTION,
         name: str = DEFAULT_NAME
         ) -> None:
+
     if setup.func is SetupType.LIN:
         print(bcolors.FAIL + "Linear reward function in training not supported.")
         raise AttributeError
+
     rewardtype = RewardType.LQ if setup.func is SetupType.LQR else RewardType.EXP
 
     train_env = gym.make('complexPendulum-v0', frequency=frequency,
                          episode_len=episode_len, path=path,
                          Q=setup.Q, R=setup.R, actiontype=actiontype,
                          rewardtype=rewardtype, s0=s0,
-                         friction=friction, log=False)
+                         friction=friction, log=False, k=setup.k)
 
     check_env(train_env)
 

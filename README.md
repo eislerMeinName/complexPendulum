@@ -17,7 +17,7 @@ For Arch Linux read [here](https://docs.anaconda.com/anaconda/install/linux/).
 
 ### complex-Pendulum
 ```bash
-$ conda env create -n complexPendulum python=3.10
+$ conda create -n complexPendulum python=3.10
 $ conda activate complexPendulum
 $ git clone https://github.com/eislerMeinName/complexPendulum.git
 $ cd complexPendulum/
