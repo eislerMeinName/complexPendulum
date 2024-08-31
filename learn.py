@@ -8,9 +8,8 @@ from stable_baselines3.sac.policies import SACPolicy
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.env_checker import check_env
 
-from complexPendulum.assets import ActionType, RewardType, EvalSetup, SetupType
-from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup6, Setup7
-from complexPendulum.assets import bcolors
+from complexPendulum.assets import ActionType, EvalSetup
+from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup6
 
 EPISODE_REWARD_THRESHOLD = 0
 
@@ -36,16 +35,10 @@ def run(steps: int = DEFAULT_STEPS,
         name: str = DEFAULT_NAME
         ) -> None:
 
-    if setup.func is SetupType.LIN:
-        print(bcolors.FAIL + "Linear reward function in training not supported.")
-        raise AttributeError
-
-    rewardtype = RewardType.LQ if setup.func is SetupType.LQR else RewardType.EXP
-
     train_env = gym.make('complexPendulum-v0', frequency=frequency,
                          episode_len=episode_len, path=path,
                          Q=setup.Q, R=setup.R, actiontype=actiontype,
-                         rewardtype=rewardtype, s0=s0,
+                         rewardtype=setup.func, s0=s0,
                          friction=friction, log=False, k=setup.k)
 
     check_env(train_env)
@@ -62,7 +55,7 @@ def run(steps: int = DEFAULT_STEPS,
     eval_env = gym.make('complexPendulum-v0', frequency=frequency,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R, actiontype=actiontype,
-                        rewardtype=rewardtype, s0=s0,
+                        rewardtype=setup.func, s0=s0,
                         friction=friction, log=False)
 
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=EPISODE_REWARD_THRESHOLD,
@@ -94,7 +87,7 @@ if __name__ == "__main__":
                         help='The length of an episode in s. (default: 15)')
     parser.add_argument('-p', '--path', default=DEFAULT_PATH, type=str,
                         help='The path to the parameter file. (default: params.xml)')
-    parser.add_argument('-se', '--setup', default=DEFAULT_SETUP, type=SetupType,
+    parser.add_argument('-se', '--setup', default=DEFAULT_SETUP, type=EvalSetup,
                         help='The training setup. (default: Setup1)')
     parser.add_argument('-a', '--actiontype', default=DEFAULT_ACTIONTYPE, type=ActionType,
                         help='The type of action. (default: ActionType.DIRECT)')

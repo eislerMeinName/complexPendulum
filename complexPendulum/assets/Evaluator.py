@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from complexPendulum.assets import EvalSetup, SetupType, EvaluationDataType, bcolors
+from complexPendulum.assets import EvalSetup, EvaluationDataType, bcolors, RewardType
 
 
 def loadLog(path: str) -> tuple:
@@ -87,7 +87,7 @@ class Evaluator:
                 if self.index is None:
                     return
                 else:
-                    self.Ts = self.Time[self.index-1]
+                    self.Ts = self.Time[self.index - 1]
                     self.states = self.states[0:self.index]
                     self.pwm = self.pwm[0:self.index]
                     self.force = self.force[0:self.index]
@@ -97,14 +97,17 @@ class Evaluator:
                 if self.index is None:
                     return
                 else:
-                    self.Ts = self.Time[self.index-1]
+                    self.Ts = self.Time[self.index - 1]
                     self.states = self.states[self.index:len(self.states)]
                     self.pwm = self.pwm[self.index:len(self.pwm)]
                     self.force = self.force[self.index:len(self.force)]
                     self.Time = self.Time[self.index:len(self.Time)]
+            case EvaluationDataType.COMPLETE:
+                if self.index is not None:
+                    self.Ts = self.Time[self.index - 1]
 
     def evalMaxima(self) -> dict:
-        """Evaluates the state maximas of swing up."""
+        """Evaluates the state maxima of swing up."""
         X = [abs(s[0, 0]) for s in self.states]
         Xdot = [abs(s[0, 1]) for s in self.states]
         Theta = [abs(s[0, 2]) for s in self.states]
@@ -113,9 +116,8 @@ class Evaluator:
         self.data['|X´|'] = max(Xdot)
         self.data['|θ|'] = max(Theta)
         self.data['|θ´|'] = max(Thetadot)
-        
-        return self.data
 
+        return self.data
 
     def evalLQR(self, Q: np.array, R: np.array, k: float = 1) -> float:
         """Evaluates the log with undiscounted linear quadratic return.
@@ -157,15 +159,15 @@ class Evaluator:
 
         return expo
 
-    def evalLIN(self) -> float:
+    def evalLIN(self, Q: np.array, R: np.array) -> float:
         """Evaluates the logged episode with undiscounted linear return.
         Return:
             lin: float
                 The undiscounted linear return.
         """
         lin: float = 0
-        for s in self.states:
-            lin -= abs(s[0, 0]) + abs(s[0, 2])
+        for i, s in enumerate(self.states):
+            lin -= np.linalg.norm(Q @ s.T) + np.linalg.norm(R * self.force[i])
 
         return lin
 
@@ -187,15 +189,17 @@ class Evaluator:
         for i, state in enumerate(self.states):
 
             # check rise time
-            if abs(state[0, 0]) < 0.1*xstart and indexTrX is None:
+            if abs(state[0, 0]) < 0.1 * xstart and indexTrX is None:
                 indexTrX = i
-            if abs(state[0, 2]) < 0.1*thetastart and indexTrTheta is None:
+            if abs(state[0, 2]) < 0.1 * thetastart and indexTrTheta is None:
                 indexTrTheta = i
 
             # check reached
-            if not xreached and ((self.states[i-1][0, 0] < 0 < state[0, 0]) or (state[0, 0] < 0 < self.states[i-1][0, 0])) and not i == 0:
+            if not xreached and ((self.states[i - 1][0, 0] < 0 < state[0, 0]) or (
+                    state[0, 0] < 0 < self.states[i - 1][0, 0])) and not i == 0:
                 xreached = True
-            if not thetareached and ((self.states[i-1][0, 2] < 0 < state[0, 2]) or (state[0, 2] < 0 < self.states[i-1][0, 2])) and not i == 0:
+            if not thetareached and ((self.states[i - 1][0, 2] < 0 < state[0, 2]) or (
+                    state[0, 2] < 0 < self.states[i - 1][0, 2])) and not i == 0:
                 thetareached = True
 
             # peak time and overshoot
@@ -239,12 +243,12 @@ class Evaluator:
         self.data["name"] = self.logpath.replace('../', '').replace('.csv', '')
         for setup in self.setups:
             match setup.func:
-                case SetupType.LQR:
+                case RewardType.LQ:
                     self.data[setup.name] = self.evalLQR(setup.Q, setup.R, setup.k)
-                case SetupType.EXP:
+                case RewardType.EXP:
                     self.data[setup.name] = self.evalEXP(setup.Q, setup.R)
-                case SetupType.LIN:
-                    self.data[setup.name] = self.evalLIN()
+                case RewardType.LIN:
+                    self.data[setup.name] = self.evalLIN(setup.Q, setup.R)
         self.data["Ts"] = self.Ts
         return self.data
 

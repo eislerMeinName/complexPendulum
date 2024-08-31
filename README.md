@@ -1,5 +1,5 @@
-# complex-Pendulum
-Complex-Pendulum is a detailed gym environment of the inverted pendulum RL environment. 
+# complexPendulum
+ComplexPendulum is a detailed gym environment of the inverted pendulum RL environment. 
 It aims at modelling real-world pendulum systems as accurate as possible.
 
 > Currently under construction...
@@ -55,7 +55,8 @@ Overview of Parameters:
 >>>     rewardtype: RewardType = RewardType.LQ,         #Defines RewardFunction
 >>>     s0: np.array = None,                            #starting state
 >>>     friction: bool = True,                          #use static friction
->>>     log: bool = True)                               #log step response
+>>>     log: bool = True,                               #log step response
+>>>     k: float = 200,                                 #normalization parameter
 ```
 ### XML-Parameter
 If you want to specify different kinematic parameters of a pendulum, edit params.xml file
@@ -109,18 +110,17 @@ EvaluationDataType is an enum showing which part of the data should be evaluated
 - SWING_UP: Only the swing-up.
 - STEP: Without swing-up.
 
-### SetupType
-SetupType is an enum showing which reward function is used for the evaluation setup
-- LQR: Uses liner quadratic reward function.
-- EXP: Uses exponential reward function.
-- LIN: Uses linear reward function.
-
 ### EvalSetup
-Describes one evaluation setup: reward function (setupType), name; Q, R, k if needed
+Describes one evaluation setup: reward function (setupType), name; Q, R, k if needed.
 
-## Learning Script
+## Learn Script
+Learn an agent with a classic RL algorithm and a wide range of possible environment parameters.
+
+## Log Script
+Load a learned agent and visualize/ log a step response.
 
 ## Evaluation Script
+Evaluate a learned agent using the evaluator class on a wide range of reward functions and classic control theory evaluation criteria.
 
 > ## Citation
 > Nothing to cite, yet...

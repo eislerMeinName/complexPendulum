@@ -4,3 +4,5 @@
 /complexPendulum/agents/__pycache__
 /complexPendulum/assets/__pycache__
 /complexPendulum.egg-info/
+/logs/
+/results/

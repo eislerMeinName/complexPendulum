@@ -11,6 +11,7 @@ class RewardType(IntEnum):
     """RewardType Enum showing the used Reward function of the environment."""
     LQ = 1
     EXP = 2
+    LIN = 3
 
 
 class ActionTypeError(Exception):

@@ -2,6 +2,7 @@ import numpy as np
 from complexPendulum.assets import ActionType
 import matplotlib.pyplot as plt
 import pandas as pd
+from pathlib import Path
 
 
 class Logger:
@@ -82,6 +83,8 @@ class Logger:
                 The path to the csv file.
         """
 
+        split_path = "".join(path.split('/')[0:-1])
+        Path(split_path).mkdir(parents=True, exist_ok=True)
         self.Time.insert(0, 0)
         self.pwm.insert(0, None)
         self.force.insert(0, None)

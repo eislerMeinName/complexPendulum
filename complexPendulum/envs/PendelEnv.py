@@ -126,9 +126,12 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         constraint = -1000 if abs(self.state[0] > 1) else 0
-        lq = -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.k + constraint
-        expo = np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2
-        return lq if self.rewardtype is RewardType.LQ else expo
+        if self.rewardtype is RewardType.LQ:
+            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.k + constraint
+        elif self.rewardtype is RewardType.EXP:
+            return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2 + constraint
+        else:
+            return -(np.linalg.norm(self.Q @ state.T) + np.linalg.norm(self.R * u))
 
     def done(self) -> tuple[bool, bool]:
         """Checks if simulation is finished.
