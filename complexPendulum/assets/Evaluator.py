@@ -126,8 +126,8 @@ class Evaluator:
                 The Q matrix.
             R: np.array
                 The R matrix.
-            k: float
-                The constant normalization factor.
+            freq: float
+                The frequency.
 
         Return:
             lqr: float
@@ -244,7 +244,7 @@ class Evaluator:
         for setup in self.setups:
             match setup.func:
                 case RewardType.LQ:
-                    self.data[setup.name] = self.evalLQR(setup.Q, setup.R, setup.k)
+                    self.data[setup.name] = self.evalLQR(setup.Q, setup.R, setup.freq)
                 case RewardType.EXP:
                     self.data[setup.name] = self.evalEXP(setup.Q, setup.R)
                 case RewardType.LIN:

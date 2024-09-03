@@ -18,4 +18,3 @@ class LQAgent(ProportionalAgent):
         K, _, _ = ct.lqr(sys.getLinearSS(), sys.Q, sys.R)
         K = np.array(K[0])
         super().__init__(K)
-

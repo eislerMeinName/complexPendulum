@@ -14,7 +14,7 @@ class EvalSetup:
     """Describes the evaluation setup."""
     def __init__(self, func: RewardType, name: str,
                  Q: np.array = None, R: np.array = None,
-                 k: float = None) -> None:
+                 freq: float = None) -> None:
         """Initialization.
         Input:
             func: RewardType
@@ -25,12 +25,12 @@ class EvalSetup:
                 The Q matrix.
             R: np.array
                 The R matrix.
-            k: float
-                The constant normalization factor.
+            freq: float
+                The control frequency
         """
 
         self.func = func
         self.name = name
         self.Q = Q
         self.R = R
-        self.k = k
+        self.freq = freq

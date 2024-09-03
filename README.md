@@ -2,10 +2,13 @@
 ComplexPendulum is a detailed gym environment of the inverted pendulum RL environment. 
 It aims at modelling real-world pendulum systems as accurate as possible.
 
-> Currently under construction...
+> ### Currently under construction...
+> - compare to Matlab Sim, find bugs (make env stochastic?)
+> - why is K* of LQR different to matlab lqr?
+> - find trainings and evaluation setups
 
 ## Installation
-This repo was written using Python3.11 with conda on Arch Linux 
+This repo was written using Python3.10 with conda on Arch Linux 
 and Ubuntu 20.04. Compatibilities with other OS should be feasible 
 out of the box, but without guarantee.
 
@@ -55,8 +58,7 @@ Overview of Parameters:
 >>>     rewardtype: RewardType = RewardType.LQ,         #Defines RewardFunction
 >>>     s0: np.array = None,                            #starting state
 >>>     friction: bool = True,                          #use static friction
->>>     log: bool = True,                               #log step response
->>>     k: float = 200,                                 #normalization parameter
+>>>     log: bool = True)                               #log step response
 ```
 ### XML-Parameter
 If you want to specify different kinematic parameters of a pendulum, edit params.xml file

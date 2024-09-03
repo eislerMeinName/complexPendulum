@@ -36,7 +36,6 @@ class ComplexPendulum(gym.Env):
                  s0: np.array = None,
                  friction: bool = True,
                  log: bool = True,
-                 k: float = 200
                  ) -> None:
 
         """
@@ -64,8 +63,6 @@ class ComplexPendulum(gym.Env):
                 Use friction during simulation.
             log: bool = True
                 Use logger.
-            k: float = 200
-                Normalisation parameter for lq reward function.
         """
 
         self.frequency = frequency
@@ -96,7 +93,6 @@ class ComplexPendulum(gym.Env):
                                                     high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float32)
 
         self.render_mode = "human"
-        self.k = k
         self.gui = gui
         self.log = log
         if self.gui:
@@ -127,7 +123,7 @@ class ComplexPendulum(gym.Env):
         state = self.state.reshape(1, -1).copy()
         constraint = -1000 if abs(self.state[0] > 1) else 0
         if self.rewardtype is RewardType.LQ:
-            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.k + constraint
+            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.frequency + constraint
         elif self.rewardtype is RewardType.EXP:
             return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2 + constraint
         else:
@@ -239,18 +235,15 @@ class ComplexPendulum(gym.Env):
 
         pwm = np.clip(pwm, -0.5, 0.5)
 
-        # Rail Limiter ???
-        # lim1 = 1 if self.state[0] >= 0.75 else 0
-        # lim2 = 1 if self.state[0] <= 0.75 else 0
-        # lim = lim1 * 3 * (self.state[0] - 0.75) + lim2 * 3 * (self.state[0] + 0.75)
-        # print(lim)
-        # pwm = np.clip(pwm - lim, -0.5, 0.5)
-
         # pwm to effective force
-
         force = pwm * self.params[7]
-        if abs(force) < self.params[8] and (self.state[1] != 0 or self.state[3] != 0):
-            force = 0
+        if self.state[1] != 0 or self.state[3] != 0:
+            if abs(force) < self.params[8]:
+                force = 0
+            elif force > -self.params[8]:
+                force = force - self.params[8]
+            else:
+                force = force + self.params[8]
 
         return pwm, force - np.sign(self.state[1]) * self.params[8]
 
