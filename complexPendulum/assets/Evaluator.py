@@ -225,13 +225,13 @@ class Evaluator:
         eXinf = self.states[-1][0, 0]
         eThetainf = self.states[-1][0, 2]
         self.data["X: Tr"] = self.Time[indexTrX]
-        self.data["X: Tm"] = self.Time[indexTmX]
+        self.data["X: Tm"] = self.Time[indexTmX] if indexTeX is not None else None
         self.data['X: Δh'] = hx
         self.data["X: Te"] = self.Time[indexTeX] if indexTeX is not None else None
         self.data['X: e∞'] = eXinf
 
         self.data['θ: Tr'] = self.Time[indexTrTheta]
-        self.data['θ: Tm'] = self.Time[indexTmTheta]
+        self.data['θ: Tm'] = self.Time[indexTmTheta] if indexTmTheta is not None else None
         self.data['θ: Δh'] = htheta
         self.data['θ: Te'] = self.Time[indexTeTheta] if indexTeTheta is not None else None
         self.data['θ: e∞'] = eThetainf

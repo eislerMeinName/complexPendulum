@@ -9,6 +9,7 @@ import xml.etree.ElementTree as etxml
 import control as ct
 from scipy.integrate import odeint
 
+
 from complexPendulum.assets import Logger, ActionType, RewardType
 
 
@@ -162,7 +163,7 @@ class ComplexPendulum(gym.Env):
         theta_s = state[2]
         theta_dot_s = state[3]
 
-        mp, l, J, m, fp, fc, g, _, _ = self.params
+        mp, l, J, m, fp, fc, g, _, _, _, _ = self.params
 
         d = 1 - (mp ** 2 * l ** 2 / (J * m)) * np.cos(theta_s) ** 2
 
@@ -198,21 +199,18 @@ class ComplexPendulum(gym.Env):
         self.state = np.array(s[-1], dtype=np.float32)
 
         self.time += 1 / self.frequency
-        if self.state[2] > np.pi:
-            self.state[2] -= 2 * np.pi
-        elif self.state[2] < -np.pi:
-            self.state[2] += 2 * np.pi
 
         rew = self.reward(u)
         done, trun = self.done()
+        obs = self.observe()
         if self.gui:
             self.render()
 
         if self.log:
             a = action if self.actiontype is ActionType.GAIN else action[0]
-            self.logger.log(self.time, self.state, pwm, u, a, rew)
+            self.logger.log(self.time, obs, pwm, u, a, rew)
 
-        return self.state, rew, done, trun, {"answer": 42}
+        return obs, rew, done, trun, {"answer": 42}
 
     def preprocessAction(self, a: np.array) -> tuple:
         """Preprocesses the action based on the actiontype.
@@ -227,7 +225,7 @@ class ComplexPendulum(gym.Env):
                 The applied force u.
         """
 
-        state = self.state.reshape(1, -1).copy()
+        state = self.observe().reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ state.T)[0, 0]
 
         a_fric = a + np.sign(a) * self.params[8]
@@ -246,6 +244,19 @@ class ComplexPendulum(gym.Env):
                 force = force + self.params[8]
 
         return pwm, force - np.sign(self.state[1]) * self.params[8]
+
+    def observe(self) -> np.array:
+        """Returns the observation based on the current state.
+        Returns:
+            obs: np.array
+                The observation.
+        """
+
+        pos: float = int(self.state[0] / self.params[9]) * self.params[9]
+        angle: float = int(self.state[2] / self.params[10]) * self.params[10]
+        angle: float = np.arctan2(np.sin(angle), np.cos(angle))
+
+        return np.array([pos, self.state[1], angle, self.state[3]], dtype=np.float32)
 
     def render(self):
         """Render the current state of the Pendulum as Pygame."""
@@ -339,7 +350,9 @@ class ComplexPendulum(gym.Env):
             float(XML_TREE.attrib['fc']), \
             float(XML_TREE.attrib['g']), \
             float(XML_TREE.attrib['M']), \
-            Fs
+            Fs, \
+            float(XML_TREE.attrib['xquant']), \
+            float(XML_TREE.attrib['thetaquant'])
 
     def stats(self) -> None:
         """Shows the logged step response data."""
@@ -379,7 +392,7 @@ class ComplexPendulum(gym.Env):
                 The state space model.
         """
 
-        mp, l, J, m, fp, fc, g, _, _ = self.params
+        mp, l, J, m, fp, fc, g, _, _, _, _ = self.params
         k = 1 / (1 - (mp * mp * l * l) / (J * m))
 
         A = [[0, 1, 0, 0],

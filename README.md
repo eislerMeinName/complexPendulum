@@ -3,7 +3,6 @@ ComplexPendulum is a detailed gym environment of the inverted pendulum RL enviro
 It aims at modelling real-world pendulum systems as accurate as possible.
 
 > ### Currently under construction...
-> - compare to Matlab Sim, find bugs (make env stochastic?)
 > - why is K* of LQR different to matlab lqr?
 > - find trainings and evaluation setups
 
@@ -75,6 +74,8 @@ or write a new XML file as input to the environment.
 |         g |                       Gravitational acceleration [m/s2]                        |      9.81      |
 |         M |                          PWM to Force coefficient [N]                          |  11.70903084   |
 |        Fs |                        Static Friction coefficient [N]                         |  0.292725771   |
+|    xquant |                          Quantization of encoder [m]                           |   5.7373e-5    |
+| thetaquant|                       Quantization of angle resolution                         |   0.001534     |
 
 ### ActionTypes
 The ActionType models the action of the agent.
