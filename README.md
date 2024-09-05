@@ -3,8 +3,7 @@ ComplexPendulum is a detailed gym environment of the inverted pendulum RL enviro
 It aims at modelling real-world pendulum systems as accurate as possible.
 
 > ### Currently under construction...
-> - why is K* of LQR different to matlab lqr?
-> - find trainings and evaluation setups
+> - find training and evaluation setups
 
 ## Installation
 This repo was written using Python3.10 with conda on Arch Linux 
@@ -101,7 +100,7 @@ Besides learning an agent via RL, there are a couple of classes containing agent
 | proportional |           General interface for proportional agent.            |    GAIN    |
 |      lq      |            Agent based on linear quadratic control.            |    GAIN    |
 |   swing-up   | Agent used to swing up the pendulum by pumping energy into it. |   DIRECT   |
-|   combined   |       Combines a swing-up agent and a proportional agent       |   DIRECT   |
+|   combined   |      Combines a swing-up agent and a proportional agent.       |   DIRECT   |
 
 ## Evaluator
 The evaluator class evaluates a logged step response on different response chunks,

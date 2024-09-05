@@ -11,7 +11,6 @@ Q: np.array = np.eye(4)
 if __name__ == "__main__":
     env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=15, Q=Q)
     lq = LQAgent(env.unwrapped)
-    #prop = ProportionalAgent(np.array([-1, -2.528, -24.695, -4.4977]))
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 

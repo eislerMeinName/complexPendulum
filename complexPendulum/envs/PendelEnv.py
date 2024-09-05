@@ -407,4 +407,5 @@ class ComplexPendulum(gym.Env):
 
         C = [[1, 0, 0, 0],
              [0, 0, 1, 0]]
+
         return ct.ss(A, B, C, np.zeros((2, 1)))
