@@ -9,8 +9,9 @@ S0: np.array = np.array([0, 0, np.pi, 0], dtype=np.float32)
 Q: np.array = np.eye(4)
 
 if __name__ == "__main__":
-    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=15, Q=Q)
+    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=30, Q=Q)
     lq = LQAgent(env.unwrapped)
+    #prop = ProportionalAgent(np.array([-9.9999999999999652, -12.446220010731196, -53.821668633114110, -9.969947846723787]))
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 

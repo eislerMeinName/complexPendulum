@@ -80,6 +80,7 @@ class ComplexPendulum(gym.Env):
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
+        self.last_state = self.state.copy()
 
         self.actiontype = actiontype
         self.rewardtype = rewardtype
@@ -225,8 +226,8 @@ class ComplexPendulum(gym.Env):
                 The applied force u.
         """
 
-        state = self.observe().reshape(1, -1).copy()
-        a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ state.T)[0, 0]
+        obs = self.observe().reshape(1, -1).copy()
+        a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ obs.T)[0, 0]
 
         a_fric = a + np.sign(a) * self.params[8]
         pwm = a_fric / self.params[7]
@@ -236,9 +237,9 @@ class ComplexPendulum(gym.Env):
         # pwm to effective force
         force = pwm * self.params[7]
         if self.state[1] != 0 or self.state[3] != 0:
-            if abs(force) < self.params[8]:
+            if abs(force) <= self.params[8]:
                 force = 0
-            elif force > -self.params[8]:
+            elif force > self.params[8]:
                 force = force - self.params[8]
             else:
                 force = force + self.params[8]
@@ -252,11 +253,16 @@ class ComplexPendulum(gym.Env):
                 The observation.
         """
 
-        pos: float = int(self.state[0] / self.params[9]) * self.params[9]
-        angle: float = int(self.state[2] / self.params[10]) * self.params[10]
+        pos: float = round(self.state[0] / self.params[9]) * self.params[9]
+        angle: float = round(self.state[2] / self.params[10]) * self.params[10]
+        vel: float = (pos - self.last_state[0]) * self.frequency
+        angledif: float = angle - self.last_state[2]
+        anglevel: float = np.arctan2(np.sin(angledif), np.cos(angledif)) * self.frequency
         angle: float = np.arctan2(np.sin(angle), np.cos(angle))
 
-        return np.array([pos, self.state[1], angle, self.state[3]], dtype=np.float32)
+        obs = np.array([pos, vel, angle, anglevel], dtype=np.float32)
+        self.last_state = obs.copy()
+        return obs
 
     def render(self):
         """Render the current state of the Pendulum as Pygame."""
