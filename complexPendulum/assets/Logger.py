@@ -86,8 +86,8 @@ class Logger:
         split_path = "".join(path.split('/')[0:-1])
         Path(split_path).mkdir(parents=True, exist_ok=True)
         self.Time.insert(0, 0)
-        self.pwm.insert(0, None)
-        self.force.insert(0, None)
+        self.pwm.insert(-1, None)
+        self.force.insert(-1, None)
         d = {'Time': self.Time,
              'X': self.X,
              'Xdot': self.Xdot,
@@ -118,20 +118,22 @@ class Logger:
         axs[1, 0].set_xlabel('t [s]')
         axs[1, 0].set_ylabel('X' + dot + ' [m/s]')
         maxX = max(self.Xdot) if abs(max(self.Xdot)) >= abs(min(self.Xdot)) else min(self.Xdot)
-        axs[1, 0].set_ylim(-1.1*abs(maxX), 1.1*abs(maxX))
+        axs[1, 0].set_ylim(-1.1*abs(maxX) - 0.01, 1.1*abs(maxX) + 0.01)
 
         axs[2, 0].plot(self.Time, self.Theta, c='r')
         axs[2, 0].set_xlabel('t [s]')
         axs[2, 0].set_ylabel(r'$\theta$')
-        axs[2, 0].set_ylim(-1.1*np.pi, 1.1*np.pi)
+        maxT = max(self.Theta) if abs(max(self.Theta)) >= abs(min(self.Theta)) else min(self.Theta)
+        axs[2, 0].set_ylim(-1.1*abs(maxT), 1.1*abs(maxT))
 
         axs[3, 0].plot(self.Time, self.Thetadot, c='r')
         axs[3, 0].set_xlabel('t [s]')
         axs[3, 0].set_ylabel(r'$\dot{\theta}$ [m/s]')
         maxTheta = max(self.Thetadot) if abs(max(self.Thetadot)) >= abs(min(self.Thetadot)) else min(self.Thetadot)
-        axs[3, 0].set_ylim(-1.1 * abs(maxTheta), 1.1 * abs(maxTheta))
+        axs[3, 0].set_ylim(-1.1 * abs(maxTheta) - 0.01, 1.1 * abs(maxTheta) + 0.01)
 
-        _ = self.Time.pop(0)
+        #_ = self.Time.pop(0)
+        self.Time.pop(0)
 
         if self.actiontype is ActionType.GAIN:
             a1 = []

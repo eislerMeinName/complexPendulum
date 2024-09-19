@@ -76,11 +76,14 @@ class ComplexPendulum(gym.Env):
 
         self.Q = Q
         self.R = R
-        self.t = np.arange(0, 1 / frequency, 1e-5)
+        self.t = np.linspace(0, 1/frequency, 2)
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
-        self.last_state = self.state.copy()
+
+        pos: float = round(self.state[0] / self.params[9]) * self.params[9]
+        angle: float = round(self.state[2] / self.params[10]) * self.params[10]
+        self.last_state = np.array([pos, self.state[1], angle, self.state[3]])
 
         self.actiontype = actiontype
         self.rewardtype = rewardtype
@@ -92,7 +95,7 @@ class ComplexPendulum(gym.Env):
                                                    high=np.zeros(4), dtype=np.float32)
 
         self.observation_space: spaces = spaces.Box(low=np.array([-1, -np.inf, -np.pi, -np.inf]),
-                                                    high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float32)
+                                                    high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float64)
 
         self.render_mode = "human"
         self.gui = gui
@@ -103,13 +106,13 @@ class ComplexPendulum(gym.Env):
             self.screen_dim = 500
             self.render()
         if self.log:
-            self.logger = Logger(self.actiontype, self.state)
+            self.logger = Logger(self.actiontype, self.observe())
 
     @staticmethod
     def sampleS0() -> np.array:
         """Samples a random starting state with random X and θ."""
 
-        return np.array([np.random.rand() - 0.5, 0, 2 * np.pi * (np.random.rand() - 0.5), 0], dtype=np.float32)
+        return np.array([np.random.rand()*0.4 - 0.2, 0, np.random.rand()*0.5-0.25, 0], dtype=np.float64)
 
     def reward(self, u: float) -> float:
         """The reward function.
@@ -134,26 +137,28 @@ class ComplexPendulum(gym.Env):
     def done(self) -> tuple[bool, bool]:
         """Checks if simulation is finished.
         Return:
-            done: bool
-                Simulation is finished.
+            termination: bool
+                Simulation is finished due to condition.
+            truncated: bool
+                Simulation finished due to time.
         """
 
-        if self.STEPS == 0:
-            return True, False
+        if self.STEPS == 1:
+            return False, True
         if abs(self.state[0]) > 1:
             return True, True
         self.STEPS -= 1
         return False, False
 
-    def intStepOde(self, state: np.array, t: float, F: float) -> np.array:
+    def intStepOde(self, state: np.array, t: float, force: float) -> np.array:
         """A single integration step of the nonlinear system dynamics.
         Input:
             x: np.array
                 The current state.
             t: float
                 The current time.
-            F: float
-                The applied force u.
+            force: float
+                The applied force.
 
         Return:
             statedot: np.array
@@ -163,19 +168,23 @@ class ComplexPendulum(gym.Env):
         x_dot_s = state[1]
         theta_s = state[2]
         theta_dot_s = state[3]
-
+        sign = lambda x: np.tanh(10000 * x)
+        F = force - sign(state[1]) * self.params[8]
         mp, l, J, m, fp, fc, g, _, _, _, _ = self.params
 
-        d = 1 - (mp ** 2 * l ** 2 / (J * m)) * np.cos(theta_s) ** 2
+        d = 1 - (mp**2 * l**2 / (J * m)) * np.cos(theta_s)**2
+
+        sinT = 0 if np.allclose(theta_s, np.pi) else np.sin(theta_s)
+        cosT = -1 if np.allclose(theta_s, np.pi) else np.cos(theta_s)
 
         x_dot = x_dot_s
-        x_ddot = F / m - mp * mp * l * l * g * np.sin(theta_s) * np.cos(theta_s) / (
-                    J * m) + mp * l * theta_dot_s * theta_dot_s * np.sin(
-            theta_s) / m + mp * l * fp * theta_dot_s * np.cos(theta_s) / (J * m) - fc * x_dot_s / m
+        x_ddot = F / m - mp * mp * l * l * g * sinT * cosT / (
+                J * m) + mp * l * theta_dot_s * theta_dot_s * sinT / m + mp * l * fp * theta_dot_s * cosT / (J * m) - fc * x_dot_s / m
         theta_dot = theta_dot_s
-        theta_ddot = mp * l * g * np.sin(theta_s) / J - mp * l * F * np.cos(theta_s) / (
-                    J * m) - mp * mp * l * l * theta_dot_s * theta_dot_s * np.sin(theta_s) * np.cos(theta_s) / (
-                                 J * m) + mp * l * fc * x_dot_s * np.cos(theta_s) / (J * m) - fp * theta_dot_s / J
+        theta_ddot = mp * l * g * sinT / J - mp * l * F * cosT / (
+                J * m) - mp * mp * l * l * theta_dot_s * theta_dot_s * sinT * cosT / (
+                             J * m) + mp * l * fc * x_dot_s * cosT / (J * m) - fp * theta_dot_s / J
+
         return np.array([x_dot, x_ddot / d, theta_dot, theta_ddot / d])
 
     def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
@@ -195,13 +204,15 @@ class ComplexPendulum(gym.Env):
                 The true answer.
         """
 
-        pwm, u = self.preprocessAction(action)
-        s = odeint(self.intStepOde, y0=self.state, t=self.t, args=(u,))
-        self.state = np.array(s[-1], dtype=np.float32)
+        pwm = self.preprocessAction(action)
+        force = self.pwmToEffectiveForce(pwm)
+
+        s = odeint(self.intStepOde, y0=self.state, t=self.t, args=(force,))
+        self.state = np.array(s[-1], dtype=np.float64)
 
         self.time += 1 / self.frequency
 
-        rew = self.reward(u)
+        rew = self.reward(force)
         done, trun = self.done()
         obs = self.observe()
         if self.gui:
@@ -209,11 +220,11 @@ class ComplexPendulum(gym.Env):
 
         if self.log:
             a = action if self.actiontype is ActionType.GAIN else action[0]
-            self.logger.log(self.time, obs, pwm, u, a, rew)
+            self.logger.log(self.time, obs, pwm, force, a, rew)
 
         return obs, rew, done, trun, {"answer": 42}
 
-    def preprocessAction(self, a: np.array) -> tuple:
+    def preprocessAction(self, a: np.array) -> float:
         """Preprocesses the action based on the actiontype.
         Input:
             a: np.array
@@ -222,8 +233,6 @@ class ComplexPendulum(gym.Env):
         Return:
             pwm: float
                 The action transformed to pwm.
-            force: float
-                The applied force u.
         """
 
         obs = self.observe().reshape(1, -1).copy()
@@ -234,17 +243,18 @@ class ComplexPendulum(gym.Env):
 
         pwm = np.clip(pwm, -0.5, 0.5)
 
-        # pwm to effective force
-        force = pwm * self.params[7]
-        if self.state[1] != 0 or self.state[3] != 0:
-            if abs(force) <= self.params[8]:
-                force = 0
-            elif force > self.params[8]:
-                force = force - self.params[8]
-            else:
-                force = force + self.params[8]
+        return pwm
 
-        return pwm, force - np.sign(self.state[1]) * self.params[8]
+    def pwmToEffectiveForce(self, pwm: float) -> float:
+        force = pwm * self.params[7]
+        if abs(force) <= self.params[8]:
+            force = 0
+        elif force > self.params[8]:
+            force = force - self.params[8]
+        else:
+            force = force + self.params[8]
+
+        return force
 
     def observe(self) -> np.array:
         """Returns the observation based on the current state.
@@ -256,11 +266,12 @@ class ComplexPendulum(gym.Env):
         pos: float = round(self.state[0] / self.params[9]) * self.params[9]
         angle: float = round(self.state[2] / self.params[10]) * self.params[10]
         vel: float = (pos - self.last_state[0]) * self.frequency
-        angledif: float = angle - self.last_state[2]
+        angledif: float = 0 if np.allclose(angle, self.last_state[2]) else angle - self.last_state[2]
         anglevel: float = np.arctan2(np.sin(angledif), np.cos(angledif)) * self.frequency
         angle: float = np.arctan2(np.sin(angle), np.cos(angle))
 
-        obs = np.array([pos, vel, angle, anglevel], dtype=np.float32)
+        obs = np.array([pos, vel, angle, anglevel], dtype=np.float64)
+
         self.last_state = obs.copy()
         return obs
 
@@ -384,12 +395,16 @@ class ComplexPendulum(gym.Env):
         self.STEPS = self.episode_len * self.frequency
         self.time = 0
         self.state = self.sampleS0() if self.s0 is None else self.s0.copy()
+        pos: float = round(self.state[0] / self.params[9]) * self.params[9]
+        angle: float = round(self.state[2] / self.params[10]) * self.params[10]
+        self.last_state = np.array([pos, self.state[1], angle, self.state[3]])
+        obs = self.observe()
 
         if self.gui:
             self.screen = None
-            self.logger.reset(self.state)
+            self.logger.reset(obs)
 
-        return self.state, {'answer': 42}
+        return obs, {'answer': 42}
 
     def getLinearSS(self) -> ct.ss:
         """Creates the linearized state space model of the pendulum with parsed parameters.

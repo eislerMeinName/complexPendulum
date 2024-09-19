@@ -67,7 +67,7 @@ class SwingUpAgent:
         vellim: float = np.clip(state[1], -self.vmax, self.vmax)
 
         swingup: float = self.ksu*np.sign(state[3]*np.cos(state[2]))
-        cartposwell: float = self.kcw*np.sign(state[0])*np.log10(1.0000001 - np.abs(poslim/self.xmax))
-        cartvelwell: float = self.kvw*np.sign(state[1])*np.log10(1.0000001 - np.abs(vellim/self.vmax))
+        cartposwell: float = self.kcw*np.sign(state[0])*np.log10(1.0000001 - np.abs(poslim)/self.xmax)
+        cartvelwell: float = self.kvw*np.sign(state[1])*np.log10(1.0000001 - np.abs(vellim)/self.vmax)
         energymaintenance: float = self.kem*(np.exp(np.abs(energy - self.eta*self.E0)) - 1) * np.sign(energy - self.E0) * np.sign(state[3]*np.cos(state[2]))
         return np.array([-swingup+cartposwell+cartvelwell+energymaintenance])

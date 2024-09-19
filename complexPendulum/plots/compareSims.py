@@ -28,9 +28,20 @@ def loadMatlabLog(path: str) -> tuple:
 
 
 if __name__ == "__main__":
-    statesM, pwmM, _, TimeM = loadMatlabLog('sim.csv')
+    statesM, pwmM, _, TimeM = loadMatlabLog('complexPendulum/plots/controlM.csv')
     statesP, pwmP, _, TimeP = loadLog('test.csv')
-    TimeP.pop()
+
+    for i, s in enumerate(statesP):
+        if abs(s[0, 2]) < 0.25:
+            index = TimeP[i]
+            break
+
+    for i, s in enumerate(statesM):
+        if abs(s[0, 2]) < 0.25:
+            index2 = TimeP[i]
+            break
+
+    TimeP.pop(len(TimeP)-1)
     XM = [s[0, 0] for s in statesM]
     XdotM = [s[0, 1] for s in statesM]
     ThetaM = [s[0, 2] for s in statesM]
@@ -49,12 +60,15 @@ if __name__ == "__main__":
     dot = '\u0307'
     axs[0].plot(TimeM, XM, c='r')
     axs[0].plot(TimeP, XP, c='b')
+    axs[0].axvline(x=index, color='g', label='axvline - full height')
+    axs[0].axvline(x=index2, color='g', label='axvline - full height')
     axs[0].set_xlabel('t [s]')
     axs[0].set_ylabel('X [m]')
-    axs[0].set_ylim(-1, 1)
+    axs[0].set_ylim(-1, 1.)
 
     axs[1].plot(TimeM, XdotM, c='r')
     axs[1].plot(TimeP, XdotP, c='b')
+    axs[1].axvline(x=index, color='g', label='axvline - full height')
     axs[1].set_xlabel('t [s]')
     axs[1].set_ylabel('X' + dot + ' [m/s]')
     maxX = max(XdotM) if abs(max(XdotM)) >= abs(min(XdotM)) else min(XdotM)
@@ -62,12 +76,14 @@ if __name__ == "__main__":
 
     axs[2].plot(TimeM, ThetaM, c='r')
     axs[2].plot(TimeP, ThetaP, c='b')
+    axs[2].axvline(x=index, color='g', label='axvline - full height')
     axs[2].set_xlabel('t [s]')
     axs[2].set_ylabel(r'$\theta$')
     axs[2].set_ylim(-1.1 * np.pi, 1.1 * np.pi)
 
     axs[3].plot(TimeM, ThetadotM, c='r')
     axs[3].plot(TimeP, ThetadotP, c='b')
+    axs[3].axvline(x=index, color='g', label='axvline - full height')
     axs[3].set_xlabel('t [s]')
     axs[3].set_ylabel(r'$\dot{\theta}$ [m/s]')
     maxTheta = max(ThetadotM) if abs(max(ThetadotM)) >= abs(min(ThetadotM)) else min(ThetadotM)
@@ -75,6 +91,7 @@ if __name__ == "__main__":
 
     axs[4].plot(TimeM, pwmM, c='r')
     axs[4].plot(TimeP, pwmP, c='b')
+    axs[4].axvline(x=index, color='g', label='axvline - full height')
     axs[4].set_xlabel('t [s]')
     axs[4].set_ylabel('pwm')
     axs[4].set_ylim(-0.7, 0.7)

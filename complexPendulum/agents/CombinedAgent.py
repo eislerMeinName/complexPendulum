@@ -37,7 +37,7 @@ class CombinedAgent:
                 The action applied as pwm.
         """
 
-        if not self.min1 <= state[2] <= self.max1:
+        if not self.min1 < state[2] < self.max1:
             return self.a1.predict(state)
         else:
             K = self.a2.predict(state)
