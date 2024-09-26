@@ -1,6 +1,6 @@
 import numpy as np
 from complexPendulum.agents.ProportionalAgent import ProportionalAgent
-from complexPendulum.envs.PendelEnv import ComplexPendulum
+from complexPendulum.envs.PendulumEnv import ComplexPendulum
 import control as ct
 
 

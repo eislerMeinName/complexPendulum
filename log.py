@@ -9,10 +9,10 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup
 
 DEFAULT_STEPS: int = 1000000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 15
+DEFAULT_EPISODE_LEN: float = 5
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
-DEFAULT_S0: np.array = np.array([0, 0, 0.0000001, 0], dtype=np.float32)
+DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/best_model.zip'
 DEFAULT_GUI: bool = True
@@ -33,22 +33,23 @@ def run(frequency: float = DEFAULT_FREQ,
 
     agent = SAC.load(name)
     actiontype = ActionType.DIRECT if agent.action_space.shape == (1,) else ActionType.GAIN
-    eval_env = gym.make('complexPendulum-v0', frequency=frequency,
+    eval_env = gym.make('directPendulum-v0', frequency=frequency,
                         episode_len=episode_len, path=path,
-                        Q=setup.Q, R=setup.R, actiontype=actiontype,
+                        Q=setup.Q, R=setup.R, #actiontype=actiontype,
                         rewardtype=setup.func, s0=s0, gui=gui,
-                        friction=friction, log=log, k=setup.k)
+                        friction=friction, log=log)
 
     state, _ = eval_env.reset()
     done = False
+    trun = False
     t00 = time.time()
     t0 = time.time_ns()
-    while not done:
+    while not done and not trun:
         while time.time_ns() - t0 < 10000000 and realtime:
             pass
         t0 = time.time_ns()
         action, _ = agent.predict(state, deterministic=True)
-        state, rew, done, _, _ = eval_env.step(action)
+        state, rew, done, trun, _ = eval_env.step(action)
 
     print(str(round(time.time() - t00, 5)) + 's')
 

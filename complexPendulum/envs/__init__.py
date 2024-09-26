@@ -1,1 +1,3 @@
-from complexPendulum.envs.PendelEnv import ComplexPendulum
+from complexPendulum.envs.PendulumEnv import ComplexPendulum
+from complexPendulum.envs.GainPendulumEnv import GainPendulum
+from complexPendulum.envs.DirectPendulumEnv import DirectPendulum

@@ -88,11 +88,11 @@ class ComplexPendulum(gym.Env):
         self.actiontype = actiontype
         self.rewardtype = rewardtype
         if actiontype == ActionType.DIRECT:
-            self.action_space: spaces = spaces.Box(low=-0.5*np.ones(1),
-                                                   high=0.5*np.ones(1), dtype=np.float32)
+            self.action_space: spaces = spaces.Box(low=-np.ones(1),
+                                                   high=np.ones(1), dtype=np.float32)
         else:
-            self.action_space: spaces = spaces.Box(low=-50 * np.ones(4),
-                                                   high=np.zeros(4), dtype=np.float32)
+            self.action_space: spaces = spaces.Box(low=-np.ones(4),
+                                                   high=np.ones(4), dtype=np.float32)
 
         self.observation_space: spaces = spaces.Box(low=np.array([-1, -np.inf, -np.pi, -np.inf]),
                                                     high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float64)
@@ -126,13 +126,15 @@ class ComplexPendulum(gym.Env):
         """
 
         state = self.state.reshape(1, -1).copy()
-        constraint = -1000 if abs(self.state[0] > 1) else 0
+        #constraint = -300 if abs(self.state[0]) > 1 else 0
+        constraint2 = -1000 if abs(self.state[2]) > 0.25 else 0
+        constraint = 0
         if self.rewardtype is RewardType.LQ:
-            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0] / self.frequency + constraint
+            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0] + constraint + constraint2
         elif self.rewardtype is RewardType.EXP:
-            return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2 + constraint
+            return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2 + constraint + constraint2
         else:
-            return -(np.linalg.norm(self.Q @ state.T) + np.linalg.norm(self.R * u))
+            return -(np.linalg.norm(self.Q @ state.T) + np.linalg.norm(self.R * u)) + constraint + constraint2
 
     def done(self) -> tuple[bool, bool]:
         """Checks if simulation is finished.
@@ -145,8 +147,8 @@ class ComplexPendulum(gym.Env):
 
         if self.STEPS == 1:
             return False, True
-        if abs(self.state[0]) > 1:
-            return True, True
+        if abs(self.state[2]) > 0.25:
+            return True, False
         self.STEPS -= 1
         return False, False
 
@@ -214,6 +216,7 @@ class ComplexPendulum(gym.Env):
 
         rew = self.reward(force)
         done, trun = self.done()
+
         obs = self.observe()
         if self.gui:
             self.render()
