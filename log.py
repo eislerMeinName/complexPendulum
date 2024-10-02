@@ -7,9 +7,9 @@ from stable_baselines3 import SAC
 from complexPendulum.assets import ActionType, RewardType, EvalSetup
 from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup6
 
-DEFAULT_STEPS: int = 1000000
+DEFAULT_STEPS: int = 100000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 5
+DEFAULT_EPISODE_LEN: float = 30
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
 DEFAULT_S0: np.array = None
@@ -38,6 +38,7 @@ def run(frequency: float = DEFAULT_FREQ,
                         Q=setup.Q, R=setup.R, #actiontype=actiontype,
                         rewardtype=setup.func, s0=s0, gui=gui,
                         friction=friction, log=log)
+    print(eval_env)
 
     state, _ = eval_env.reset()
     done = False

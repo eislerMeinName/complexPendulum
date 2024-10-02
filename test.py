@@ -10,13 +10,13 @@ S0 = None
 Q: np.array = np.eye(4)
 
 if __name__ == "__main__":
-    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=30, Q=Q)
+    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=5, Q=Q)
     lq = LQAgent(env.unwrapped)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 
     state, _ = env.reset()
-    print(state)
+    #print(state)
     done = False
     t00 = time.time()
     t0 = time.time_ns()

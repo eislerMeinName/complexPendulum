@@ -14,13 +14,13 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup
 
 EPISODE_REWARD_THRESHOLD = 0
 
-DEFAULT_STEPS: int = 1000000
+DEFAULT_STEPS: int = 500000
 DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 5
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
 DEFAULT_ACTIONTYPE: ActionType = ActionType.DIRECT
-DEFAULT_S0: np.array = np.array([0, 0, 0.0001, 0])
+DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
 
@@ -37,7 +37,7 @@ def run(steps: int = DEFAULT_STEPS,
         ) -> None:
 
     env_kwargs: dict = dict(frequency=frequency, episode_len=episode_len, path=path,
-                            Q=setup.Q, R=setup.R, #actiontype=actiontype,
+                            Q=setup.Q, R=setup.R,
                             rewardtype=setup.func, s0=s0,
                             friction=friction, log=False)
 

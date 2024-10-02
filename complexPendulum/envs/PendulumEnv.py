@@ -126,15 +126,14 @@ class ComplexPendulum(gym.Env):
         """
 
         state = self.state.reshape(1, -1).copy()
-        #constraint = -300 if abs(self.state[0]) > 1 else 0
-        constraint2 = -1000 if abs(self.state[2]) > 0.25 else 0
-        constraint = 0
+        state[0, 2] = np.arctan2(np.sin(state[0, 2]), np.cos(state[0, 2]))
         if self.rewardtype is RewardType.LQ:
-            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0] + constraint + constraint2
+            return -(state @ self.Q @ state.T + u * self.R * u)[0, 0]
         elif self.rewardtype is RewardType.EXP:
-            return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2 + constraint + constraint2
+            return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2
         else:
-            return -(np.linalg.norm(self.Q @ state.T) + np.linalg.norm(self.R * u)) + constraint + constraint2
+            return -(np.linalg.norm(self.Q @ state.T) + np.linalg.norm(self.R * u))
+
 
     def done(self) -> tuple[bool, bool]:
         """Checks if simulation is finished.
@@ -147,8 +146,6 @@ class ComplexPendulum(gym.Env):
 
         if self.STEPS == 1:
             return False, True
-        if abs(self.state[2]) > 0.25:
-            return True, False
         self.STEPS -= 1
         return False, False
 
@@ -241,12 +238,13 @@ class ComplexPendulum(gym.Env):
         obs = self.observe().reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ obs.T)[0, 0]
 
+
         a_fric = a + np.sign(a) * self.params[8]
         pwm = a_fric / self.params[7]
 
         pwm = np.clip(pwm, -0.5, 0.5)
 
-        return pwm
+        return pwm if self.actiontype == ActionType.GAIN else a
 
     def pwmToEffectiveForce(self, pwm: float) -> float:
         force = pwm * self.params[7]
@@ -387,6 +385,11 @@ class ComplexPendulum(gym.Env):
 
         if self.gui:
             pygame.quit()
+
+    def __str__(self) -> str:
+        """Returns a string with condensed info of environment."""
+        general: str = f"\nEnvironment: {self.__class__.__name__}\nObservationSpace: {self.observation_space} \nActionSpace: {self.action_space} \nActionType: {self.actiontype.__class__.__name__} \nRewardType: {self.rewardtype.__class__.__name__} \n Params: {self.params}"
+        return general
 
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None, ) -> tuple[ObsType, dict[str, Any]]:
         """Resets the environment.

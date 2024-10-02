@@ -42,4 +42,9 @@ class CombinedAgent:
         else:
             K = self.a2.predict(state)
             s = state.reshape(1, -1).copy()
-            return np.array([-(K.reshape(1, -1)@s.T)[0, 0]])
+            a = -(K.reshape(1, -1)@s.T)[0, 0]
+            a_fric = a + np.sign(a) * self.a1.env.params[8]
+            pwm = a_fric / self.a1.env.params[7]
+
+            pwm = np.clip(pwm, -0.5, 0.5)
+            return np.array([pwm])
