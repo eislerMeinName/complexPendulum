@@ -5,9 +5,11 @@ It aims at modelling real-world pendulum systems as accurate as possible.
 > ### Currently under construction...
 > - find training and evaluation setups
 
+<img src="res/firstModel.gif">
+
 ## Installation
 This repo was written using Python3.10 with conda on Arch Linux 
-and Ubuntu 20.04. Compatibilities with other OS should be feasible 
+and Ubuntu 20.04, 24.04. Compatibilities with other OS should be feasible 
 out of the box, but without guarantee.
 
 ### Conda
@@ -58,6 +60,9 @@ Overview of Parameters:
 >>>     friction: bool = True,                          #use static friction
 >>>     log: bool = True)                               #log step response
 ```
+
+For Training please use DirectPendulum or GainPendulum environment.
+
 ### XML-Parameter
 If you want to specify different kinematic parameters of a pendulum, edit params.xml file
 or write a new XML file as input to the environment.
@@ -90,17 +95,18 @@ The RewardTypes specify the reward function of the environment.
 The logger logs the current step response and may plot it using matplotlib.
 You can also write the data to a csv file.
 
-<img src="readme_images/loggerexample.png">
+<img src="res/loggerexample.png">
 
 ## Agents
 Besides learning an agent via RL, there are a couple of classes containing agents based on classical control engineering.
 
-|    agent     |                          explanation                           | actiontype |
-|:------------:|:--------------------------------------------------------------:|:----------:|
-| proportional |           General interface for proportional agent.            |    GAIN    |
-|      lq      |            Agent based on linear quadratic control.            |    GAIN    |
-|   swing-up   | Agent used to swing up the pendulum by pumping energy into it. |   DIRECT   |
-|   combined   |      Combines a swing-up agent and a proportional agent.       |   DIRECT   |
+|    agent     |                             explanation                             |  actiontype  |
+|:------------:|:-------------------------------------------------------------------:|:------------:|
+| proportional |              General interface for proportional agent.              |     GAIN     |
+|      lq      |              Agent based on linear quadratic control.               |     GAIN     |
+|   swing-up   |   Agent used to swing up the pendulum by pumping energy into it.    |    DIRECT    |
+|   neural     |                     Agent based on neural net.                      | GAIN/DIRECT  |
+|   combined   | Combines a swing-up agent and a proportional agent or neural agent. |    DIRECT    |
 
 ## Evaluator
 The evaluator class evaluates a logged step response on different response chunks,
@@ -123,6 +129,12 @@ Load a learned agent and visualize/ log a step response.
 
 ## Evaluation Script
 Evaluate a learned agent using the evaluator class on a wide range of reward functions and classic control theory evaluation criteria.
+
+## Video Script
+Generate a video of a trajectory threw the environment.
+
+## Parameter Calculation Script
+Calculates the necessary parameter for your xml file based on simpler parameters, that are easier to identify.
 
 > ## Citation
 > Nothing to cite, yet...

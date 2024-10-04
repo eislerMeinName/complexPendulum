@@ -15,9 +15,11 @@ class DirectPendulum(ComplexPendulum):
                  R: np.ndarray = np.eye(1),
                  gui: bool = False,
                  rewardtype: RewardType = RewardType.LQ,
+                 conditionReward: bool = False,
                  s0: np.array = None,
                  friction: bool = True,
                  log: bool = True,
+                 render_mode: str = "rgb_array"
                  ) -> None:
 
         """
@@ -37,18 +39,22 @@ class DirectPendulum(ComplexPendulum):
                 Render the gui.
             rewardtype: RewardType = RewardType.LQ
                 The type of the reward function.
+            conditionReward: bool = False
+                Use conditioned reward function.
             s0: np.array = None
                 The starting state indicating random sampling or fixed starting state.
             friction: bool = True
                 Use friction during simulation.
             log: bool = True
                 Use logger.
+            render_mode: str = "rgb_array"
+                The render mode.
         """
 
         super().__init__(frequency=frequency, episode_len=episode_len,
                          path=path, Q=Q, R=R, gui=gui,
                          actiontype=ActionType.DIRECT, rewardtype=rewardtype,
-                         s0=s0, friction=friction, log=log)
+                         s0=s0, friction=friction, log=log, conditionReward=conditionReward, render_mode=render_mode)
 
     def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
         """The step function simulates a single control step in the environment.

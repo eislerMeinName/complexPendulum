@@ -14,15 +14,17 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup
 
 EPISODE_REWARD_THRESHOLD = 0
 
-DEFAULT_STEPS: int = 500000
+DEFAULT_STEPS: int = 1000000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 5
+DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
-DEFAULT_ACTIONTYPE: ActionType = ActionType.DIRECT
+DEFAULT_ACTIONTYPE: ActionType = ActionType.GAIN
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
+DEFAULT_CONDITION: bool = False
+DEFAULT_ENV = "gainPendulum-v0"
 
 
 def run(steps: int = DEFAULT_STEPS,
@@ -33,15 +35,16 @@ def run(steps: int = DEFAULT_STEPS,
         actiontype: ActionType = DEFAULT_ACTIONTYPE,
         s0: np.array = DEFAULT_S0,
         friction: bool = DEFAULT_FRICTION,
-        name: str = DEFAULT_NAME
+        name: str = DEFAULT_NAME,
+        condition: bool = DEFAULT_CONDITION
         ) -> None:
 
     env_kwargs: dict = dict(frequency=frequency, episode_len=episode_len, path=path,
                             Q=setup.Q, R=setup.R,
                             rewardtype=setup.func, s0=s0,
-                            friction=friction, log=False)
+                            friction=friction, log=False, conditionReward=condition)
 
-    train_env = make_vec_env("directPendulum-v0", n_envs=4, seed=0, env_kwargs=env_kwargs)
+    train_env = make_vec_env(DEFAULT_ENV, n_envs=4, seed=0, env_kwargs=env_kwargs)
 
     offpolicy_kwargs: dict = dict(activation_fn=torch.nn.ReLU,
                                   net_arch=[32, 16])
@@ -54,7 +57,7 @@ def run(steps: int = DEFAULT_STEPS,
                 train_freq=1, gradient_steps=2
                 )
 
-    eval_env = make_vec_env('directPendulum-v0', env_kwargs=env_kwargs, n_envs=4, seed=0)
+    eval_env = make_vec_env(DEFAULT_ENV, env_kwargs=env_kwargs, n_envs=4, seed=0)
 
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=EPISODE_REWARD_THRESHOLD,
                                                      verbose=1)

@@ -20,9 +20,8 @@ class ComplexPendulum(gym.Env):
         "render_modes": [
             "human",
             "rgb_array",
-            "depth_array",
         ],
-        "render_fps": 25,
+        "render_fps": 100,
     }
 
     def __init__(self,
@@ -34,9 +33,11 @@ class ComplexPendulum(gym.Env):
                  gui: bool = False,
                  actiontype: ActionType = ActionType.DIRECT,
                  rewardtype: RewardType = RewardType.LQ,
+                 conditionReward: bool = False,
                  s0: np.array = None,
                  friction: bool = True,
                  log: bool = True,
+                 render_mode: str = "human"
                  ) -> None:
 
         """
@@ -58,12 +59,16 @@ class ComplexPendulum(gym.Env):
                 The Action Space type.
             rewardtype: RewardType = RewardType.LQ
                 The type of the reward function.
+            conditionReward: bool = False
+                Use conditioned rewawrd.
             s0: np.array = None
                 The starting state indicating random sampling or fixed starting state.
             friction: bool = True
                 Use friction during simulation.
             log: bool = True
                 Use logger.
+            render_mode: str = human
+                Render mode.
         """
 
         self.frequency = frequency
@@ -77,6 +82,7 @@ class ComplexPendulum(gym.Env):
         self.Q = Q
         self.R = R
         self.t = np.linspace(0, 1/frequency, 2)
+        self.conditionReward = conditionReward
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
@@ -97,7 +103,7 @@ class ComplexPendulum(gym.Env):
         self.observation_space: spaces = spaces.Box(low=np.array([-1, -np.inf, -np.pi, -np.inf]),
                                                     high=np.array([1, np.inf, np.pi, np.inf]), dtype=np.float64)
 
-        self.render_mode = "human"
+        self.render_mode = render_mode#"rgb_array" #"human"
         self.gui = gui
         self.log = log
         if self.gui:
@@ -111,7 +117,10 @@ class ComplexPendulum(gym.Env):
     @staticmethod
     def sampleS0() -> np.array:
         """Samples a random starting state with random X and θ."""
-
+        pos : float = np.random.rand()*0.4 - 0.2
+        vel: float = np.random.rand()/10
+        angle: float = np.random.rand()*0.5-0.25
+        anglevel: float = np.random.rand()/10
         return np.array([np.random.rand()*0.4 - 0.2, 0, np.random.rand()*0.5-0.25, 0], dtype=np.float64)
 
     def reward(self, u: float) -> float:
@@ -127,7 +136,10 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         state[0, 2] = np.arctan2(np.sin(state[0, 2]), np.cos(state[0, 2]))
-        if self.rewardtype is RewardType.LQ:
+        if self.conditionReward:
+            if abs(state[0, 2]) > 0.3 or abs(self.state[0]) > 0.7:
+                return -500
+        elif self.rewardtype is RewardType.LQ:
             return -(state @ self.Q @ state.T + u * self.R * u)[0, 0]
         elif self.rewardtype is RewardType.EXP:
             return np.exp(-np.linalg.norm(self.Q @ state.T)) + np.exp(- np.linalg.norm(self.R * u)) - 2
@@ -146,6 +158,10 @@ class ComplexPendulum(gym.Env):
 
         if self.STEPS == 1:
             return False, True
+        if self.conditionReward:
+            angle = np.arctan2(np.sin(self.state[2]), np.cos(self.state[2]))
+            if abs(angle) > 0.3 or abs(self.state[0]) > 0.7:
+                return True, False
         self.STEPS -= 1
         return False, False
 
@@ -212,7 +228,7 @@ class ComplexPendulum(gym.Env):
         self.time += 1 / self.frequency
 
         rew = self.reward(force)
-        done, trun = self.done()
+        term, trun = self.done()
 
         obs = self.observe()
         if self.gui:
@@ -222,7 +238,7 @@ class ComplexPendulum(gym.Env):
             a = action if self.actiontype is ActionType.GAIN else action[0]
             self.logger.log(self.time, obs, pwm, force, a, rew)
 
-        return obs, rew, done, trun, {"answer": 42}
+        return obs, rew, term, trun, {"answer": 42}
 
     def preprocessAction(self, a: np.array) -> float:
         """Preprocesses the action based on the actiontype.
@@ -235,7 +251,7 @@ class ComplexPendulum(gym.Env):
                 The action transformed to pwm.
         """
 
-        obs = self.observe().reshape(1, -1).copy()
+        obs = self.last_state.reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ obs.T)[0, 0]
 
 
@@ -304,7 +320,10 @@ class ComplexPendulum(gym.Env):
         self.screen.blit(self.surf, (0, 0))
         self.screen.blit(text, (0, 0))
 
-        pygame.display.flip()
+        if self.render_mode == "human":
+            pygame.display.flip()
+        else:
+            return np.transpose(np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2))
 
     def pygamedrawPend(self) -> None:
         """Draw the pendulum in pygame screen."""
@@ -402,15 +421,16 @@ class ComplexPendulum(gym.Env):
         self.time = 0
         self.state = self.sampleS0() if self.s0 is None else self.s0.copy()
         pos: float = round(self.state[0] / self.params[9]) * self.params[9]
-        angle: float = round(self.state[2] / self.params[10]) * self.params[10]
-        self.last_state = np.array([pos, self.state[1], angle, self.state[3]])
-        obs = self.observe()
+        angle = np.arctan2(np.sin(self.state[2]), np.cos(self.state[2]))
+        angle: float = round(angle / self.params[10]) * self.params[10]
+        self.last_state = np.array([pos, self.state[1], angle, self.state[3]], dtype=np.float64)
 
         if self.gui:
             self.screen = None
-            self.logger.reset(obs)
+        if self.log:
+            self.logger.reset(self.state)
 
-        return obs, {'answer': 42}
+        return self.last_state, {'answer': 42}
 
     def getLinearSS(self) -> ct.ss:
         """Creates the linearized state space model of the pendulum with parsed parameters.

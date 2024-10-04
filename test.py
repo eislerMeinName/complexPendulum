@@ -1,22 +1,26 @@
 import gymnasium as gym
 import numpy as np
+from stable_baselines3 import SAC
+
 from complexPendulum.agents import LQAgent, SwingUpAgent, CombinedAgent, ProportionalAgent
+from complexPendulum.agents.NeuralAgent import NeuralAgent
+from complexPendulum.agents.neuralAgents import nAgent1
+from complexPendulum.assets import ActionType
 import time
 
 REALTIME: bool = True
 GUI: bool = True
-#S0: np.array = np.array([0, 0, 0.1, 0], dtype=np.float64)
-S0 = None
+S0: np.array = np.array([0, 0, np.pi - 0.01, 0], dtype=np.float64)
 Q: np.array = np.eye(4)
 
 if __name__ == "__main__":
-    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=5, Q=Q)
+    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=30, Q=Q, render_mode="human", actiontype=ActionType.DIRECT)
     lq = LQAgent(env.unwrapped)
+    #neural = NeuralAgent(nAgent1)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 
     state, _ = env.reset()
-    #print(state)
     done = False
     t00 = time.time()
     t0 = time.time_ns()
@@ -27,6 +31,10 @@ if __name__ == "__main__":
         action = agent.predict(state)
         state, rew, term, trun, _ = env.step(action)
         done = term or trun
+        if done:
+            print(env.unwrapped.time)
+            print(term)
+            print(trun)
 
     print(str(round(time.time() - t00, 5)) + 's')
 
