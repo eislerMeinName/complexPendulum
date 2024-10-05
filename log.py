@@ -3,6 +3,8 @@ import numpy as np
 import time
 
 from stable_baselines3 import SAC
+
+from complexPendulum.agents import LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
 from complexPendulum.assets import ActionType, RewardType, EvalSetup
 from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup6
@@ -12,12 +14,12 @@ DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 60
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
-DEFAULT_S0: np.array = np.array([0.20189575, 0.18359375, 0.24390295, -1.84077695])
+DEFAULT_S0: np.array = np.array([0.1, 0, 0.2, 0])
 DEFAULT_FRICTION: bool = True
-DEFAULT_NAME: str = 'complexPendulum/agents/neuralAgents/Setup1SacGain'
+DEFAULT_NAME: str = 'results/best_model'
 DEFAULT_GUI: bool = True
 DEFAULT_LOG: bool = True
-DEFAULT_ENV = "gainPendulum-v0"
+DEFAULT_ENV = "complexPendulum-v0"
 
 
 def run(frequency: float = DEFAULT_FREQ,
@@ -30,13 +32,14 @@ def run(frequency: float = DEFAULT_FREQ,
         log: bool = DEFAULT_LOG,
         name: str = DEFAULT_NAME) -> None:
 
-    agent = SAC.load(name)
-    actiontype = ActionType.DIRECT if agent.action_space.shape == (1,) else ActionType.GAIN
+    agent = NeuralAgent({"Agent": SAC.load(name)})
+    agent2 = SAC.load(name)
+    #actiontype = ActionType.DIRECT if agent.action_space.shape == (1,) else ActionType.GAIN
     eval_env = gym.make(DEFAULT_ENV, frequency=frequency,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R,
                         rewardtype=setup.func, s0=s0, gui=gui,
-                        friction=friction, log=log, render_mode="human")
+                        friction=friction, log=log, render_mode="human", actiontype=ActionType.GAIN)
     print(eval_env)
 
     state, _ = eval_env.reset()
@@ -44,7 +47,9 @@ def run(frequency: float = DEFAULT_FREQ,
     trun = False
     t00 = time.time()
     while not done and not trun:
-        action, _ = agent.predict(state, deterministic=True)
+        action = agent.predict(state)
+        action2, _ = agent2.predict(state, deterministic=True)
+        action2 = (action2-1)*50
 
         state, rew, done, trun, _ = eval_env.step(action)
 

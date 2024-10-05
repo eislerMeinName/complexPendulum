@@ -1,26 +1,31 @@
 import gymnasium as gym
 import numpy as np
 from stable_baselines3 import SAC
+from sympy.strategies.branch import condition
 
 from complexPendulum.agents import LQAgent, SwingUpAgent, CombinedAgent, ProportionalAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent1
+from complexPendulum.agents.neuralAgents import nAgent1, nAgent2
 from complexPendulum.assets import ActionType
 import time
 
 REALTIME: bool = True
 GUI: bool = True
-S0: np.array = np.array([0, 0, np.pi - 0.01, 0], dtype=np.float64)
-Q: np.array = np.eye(4)
+S0: np.array = np.array([0, 0, np.pi + np.random.rand()/100 - 0.01, 0], dtype=np.float64)
+Q: np.array = np.eye(4)/100
+R = np.ones(1)/1000
 
 if __name__ == "__main__":
-    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True, episode_len=30, Q=Q, render_mode="human", actiontype=ActionType.DIRECT)
+    env = gym.make('complexPendulum-v0', gui=GUI, s0=S0, friction=True,
+                   episode_len=30, Q=Q, R=R, render_mode="human", actiontype=ActionType.DIRECT,
+                   conditionReward=False)
     lq = LQAgent(env.unwrapped)
-    #neural = NeuralAgent(nAgent1)
+    neural = NeuralAgent(nAgent2)
     swingup = SwingUpAgent(env.unwrapped)
-    agent = CombinedAgent(swingup, lq)
+    agent = CombinedAgent(swingup, neural)
 
     state, _ = env.reset()
+    #print(state[2] - np.pi)
     done = False
     t00 = time.time()
     t0 = time.time_ns()

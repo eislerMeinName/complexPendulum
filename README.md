@@ -5,7 +5,11 @@ It aims at modelling real-world pendulum systems as accurate as possible.
 > ### Currently under construction...
 > - find training and evaluation setups
 
-<img src="res/firstModel.gif">
+
+<p align="center">
+  <img src="res/firstModel.gif">
+</p>
+
 
 ## Installation
 This repo was written using Python3.10 with conda on Arch Linux 

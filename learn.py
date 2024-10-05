@@ -23,7 +23,7 @@ DEFAULT_ACTIONTYPE: ActionType = ActionType.GAIN
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
-DEFAULT_CONDITION: bool = False
+DEFAULT_CONDITION: bool = True
 DEFAULT_ENV = "gainPendulum-v0"
 
 

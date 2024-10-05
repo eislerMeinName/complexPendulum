@@ -33,7 +33,7 @@ class ComplexPendulum(gym.Env):
                  gui: bool = False,
                  actiontype: ActionType = ActionType.DIRECT,
                  rewardtype: RewardType = RewardType.LQ,
-                 conditionReward: bool = False,
+                 conditionReward: bool = True,
                  s0: np.array = None,
                  friction: bool = True,
                  log: bool = True,
@@ -118,10 +118,11 @@ class ComplexPendulum(gym.Env):
     def sampleS0() -> np.array:
         """Samples a random starting state with random X and θ."""
         pos : float = np.random.rand()*0.4 - 0.2
-        vel: float = np.random.rand()/10
+        vel: float = 0#np.random.rand()*2/3 - 1/3
         angle: float = np.random.rand()*0.5-0.25
-        anglevel: float = np.random.rand()/10
-        return np.array([np.random.rand()*0.4 - 0.2, 0, np.random.rand()*0.5-0.25, 0], dtype=np.float64)
+        anglevel: float = 0#np.random.rand()*2/3 - 1/3
+        #return np.array([np.random.rand()*0.4 - 0.2, 0, np.random.rand()*0.5-0.25, 0], dtype=np.float64)
+        return np.array([pos, vel, angle, anglevel])
 
     def reward(self, u: float) -> float:
         """The reward function.
@@ -136,9 +137,8 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         state[0, 2] = np.arctan2(np.sin(state[0, 2]), np.cos(state[0, 2]))
-        if self.conditionReward:
-            if abs(state[0, 2]) > 0.3 or abs(self.state[0]) > 0.7:
-                return -500
+        if abs(state[0, 2]) > 0.3 or abs(self.state[0]) > 0.7 and self.conditionReward:
+            return -1000
         elif self.rewardtype is RewardType.LQ:
             return -(state @ self.Q @ state.T + u * self.R * u)[0, 0]
         elif self.rewardtype is RewardType.EXP:
