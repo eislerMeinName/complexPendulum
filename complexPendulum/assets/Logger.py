@@ -1,4 +1,6 @@
 import numpy as np
+from sympy.physics.units import force
+
 from complexPendulum.assets import ActionType
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -85,9 +87,11 @@ class Logger:
 
         split_path = "".join(path.split('/')[0:-1])
         Path(split_path).mkdir(parents=True, exist_ok=True)
-        self.Time.insert(0, 0)
-        self.pwm.insert(-1, None)
-        self.force.insert(-1, None)
+        if self.Time[0] != 0:
+            self.Time.insert(0, 0)
+        self.pwm.insert(-1, 0)
+        self.force.insert(-1, 0)
+
         d = {'Time': self.Time,
              'X': self.X,
              'Xdot': self.Xdot,

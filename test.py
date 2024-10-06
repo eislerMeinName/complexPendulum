@@ -11,7 +11,7 @@ import time
 
 REALTIME: bool = True
 GUI: bool = True
-S0: np.array = np.array([0, 0, np.pi + np.random.rand()/100 - 0.01, 0], dtype=np.float64)
+S0: np.array = np.array([0, 0, 0 + np.random.rand()/50 - 0.01, 0], dtype=np.float64)
 Q: np.array = np.eye(4)/100
 R = np.ones(1)/1000
 
@@ -20,12 +20,12 @@ if __name__ == "__main__":
                    episode_len=30, Q=Q, R=R, render_mode="human", actiontype=ActionType.DIRECT,
                    conditionReward=False)
     lq = LQAgent(env.unwrapped)
+    print(lq.K)
     neural = NeuralAgent(nAgent2)
     swingup = SwingUpAgent(env.unwrapped)
-    agent = CombinedAgent(swingup, neural)
+    agent = CombinedAgent(swingup, lq)
 
     state, _ = env.reset()
-    #print(state[2] - np.pi)
     done = False
     t00 = time.time()
     t0 = time.time_ns()
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         while time.time_ns()-t0 < 10000000 and REALTIME:
             pass
         t0 = time.time_ns()
-        action = agent.predict(state)
+        action = np.array([0])#agent.predict(state)
         state, rew, term, trun, _ = env.step(action)
         done = term or trun
         if done:

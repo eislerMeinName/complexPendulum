@@ -1,5 +1,9 @@
+import math
+
 import numpy as np
 import pandas as pd
+from tensorboard.plugins.hparams.metadata import parse_session_end_info_plugin_data
+
 from complexPendulum.assets import EvalSetup, EvaluationDataType, bcolors, RewardType
 
 
@@ -25,12 +29,8 @@ def loadLog(path: str) -> tuple:
     Thetadot = frame['Thetadot'].to_list()
     pwm = frame['pwm'].to_list()
     force = frame['force'].to_list()
-    X.pop(0)
-    Xdot.pop(0)
-    Theta.pop(0)
-    Thetadot.pop(0)
-    pwm.pop(0)
-    force.pop(0)
+    force.pop(-1)
+    pwm.pop(-1)
     states = [np.array([[X[i], Xdot[i], Theta[i], Thetadot[i]]]) for i in range(0, len(X))]
     return states, pwm, force, frame['Time'].to_list()
 
@@ -54,7 +54,7 @@ class Evaluator:
                 The parameters for determining the settling time (x, theta).
         """
 
-        print(bcolors.OKBLUE + f"Evaluating {datatype.name} \n" + bcolors.ENDC)
+        #print(bcolors.OKBLUE + f"Evaluating {datatype.name} \n" + bcolors.ENDC)
         self.logpath = logpath
         self.datatype = datatype
         self.Ts = 0
@@ -119,15 +119,13 @@ class Evaluator:
 
         return self.data
 
-    def evalLQR(self, Q: np.array, R: np.array, k: float = 1) -> float:
+    def evalLQR(self, Q: np.array, R: np.array) -> float:
         """Evaluates the log with undiscounted linear quadratic return.
         Input:
             Q: np.array
                 The Q matrix.
             R: np.array
                 The R matrix.
-            freq: float
-                The frequency.
 
         Return:
             lqr: float
@@ -136,7 +134,8 @@ class Evaluator:
 
         lqr: float = 0
         for i, s in enumerate(self.states):
-            lqr -= (s @ Q @ s.T + self.force[i] * R * self.force[i])[0, 0] / k
+            if i!=0:
+                lqr -= (s @ Q @ s.T + self.force[i-1] * R * self.force[i-1])[0, 0]
 
         return lqr
 
@@ -224,13 +223,13 @@ class Evaluator:
 
         eXinf = self.states[-1][0, 0]
         eThetainf = self.states[-1][0, 2]
-        self.data["X: Tr"] = self.Time[indexTrX]
-        self.data["X: Tm"] = self.Time[indexTmX] if indexTeX is not None else None
+        self.data["X: Tr"] = self.Time[indexTrX] if indexTrX is not None else None
+        self.data["X: Tm"] = self.Time[indexTmX] if indexTmX is not None else None
         self.data['X: Δh'] = hx
         self.data["X: Te"] = self.Time[indexTeX] if indexTeX is not None else None
         self.data['X: e∞'] = eXinf
 
-        self.data['θ: Tr'] = self.Time[indexTrTheta]
+        self.data['θ: Tr'] = self.Time[indexTrTheta] if indexTrTheta is not None else None
         self.data['θ: Tm'] = self.Time[indexTmTheta] if indexTmTheta is not None else None
         self.data['θ: Δh'] = htheta
         self.data['θ: Te'] = self.Time[indexTeTheta] if indexTeTheta is not None else None
@@ -244,7 +243,7 @@ class Evaluator:
         for setup in self.setups:
             match setup.func:
                 case RewardType.LQ:
-                    self.data[setup.name] = self.evalLQR(setup.Q, setup.R, setup.freq)
+                    self.data[setup.name] = self.evalLQR(setup.Q, setup.R)
                 case RewardType.EXP:
                     self.data[setup.name] = self.evalEXP(setup.Q, setup.R)
                 case RewardType.LIN:

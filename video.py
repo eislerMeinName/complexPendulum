@@ -33,7 +33,7 @@ def run(name: str = DEFAULT_NAME) -> None:
         img = env.render()
 
     video_name: str = "logs/firstModel"
-    imageio.mimsave(video_name + ".gif", [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=100)
+    imageio.mimsave(video_name + ".gif", [np.array(img) for i, img in enumerate(images) if i % 5 == 0], fps=20)
     imageio.mimsave(video_name + ".mp4", [np.array(img) for i, img in enumerate(images) ], fps=100)
 
     env.close()

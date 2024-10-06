@@ -14,7 +14,7 @@ DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 60
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
-DEFAULT_S0: np.array = np.array([0.1, 0, 0.2, 0])
+DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/best_model'
 DEFAULT_GUI: bool = True
@@ -33,14 +33,13 @@ def run(frequency: float = DEFAULT_FREQ,
         name: str = DEFAULT_NAME) -> None:
 
     agent = NeuralAgent({"Agent": SAC.load(name)})
-    agent2 = SAC.load(name)
     #actiontype = ActionType.DIRECT if agent.action_space.shape == (1,) else ActionType.GAIN
     eval_env = gym.make(DEFAULT_ENV, frequency=frequency,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R,
                         rewardtype=setup.func, s0=s0, gui=gui,
                         friction=friction, log=log, render_mode="human", actiontype=ActionType.GAIN)
-    print(eval_env)
+    print(eval_env.unwrapped)
 
     state, _ = eval_env.reset()
     done = False
@@ -48,9 +47,6 @@ def run(frequency: float = DEFAULT_FREQ,
     t00 = time.time()
     while not done and not trun:
         action = agent.predict(state)
-        action2, _ = agent2.predict(state, deterministic=True)
-        action2 = (action2-1)*50
-
         state, rew, done, trun, _ = eval_env.step(action)
 
     print(str(round(time.time() - t00, 5)) + 's')

@@ -112,7 +112,7 @@ class ComplexPendulum(gym.Env):
             self.screen_dim = 500
             self.render()
         if self.log:
-            self.logger = Logger(self.actiontype, self.observe())
+            self.logger = Logger(self.actiontype, self.last_state)
 
     @staticmethod
     def sampleS0() -> np.array:
@@ -428,7 +428,7 @@ class ComplexPendulum(gym.Env):
         if self.gui:
             self.screen = None
         if self.log:
-            self.logger.reset(self.state)
+            self.logger.reset(self.last_state)
 
         return self.last_state, {'answer': 42}
 
