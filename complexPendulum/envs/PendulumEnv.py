@@ -254,7 +254,6 @@ class ComplexPendulum(gym.Env):
         obs = self.last_state.reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ obs.T)[0, 0]
 
-
         a_fric = a + np.sign(a) * self.params[8]
         pwm = a_fric / self.params[7]
 

@@ -28,8 +28,8 @@ def loadMatlabLog(path: str) -> tuple:
 
 
 if __name__ == "__main__":
-    statesM, pwmM, _, TimeM = loadMatlabLog('complexPendulum/plots/controlM.csv')
-    statesP, pwmP, _, TimeP = loadLog('test.csv')
+    statesM, pwmM, _, TimeM = loadMatlabLog('swingupM.csv')
+    statesP, pwmP, _, TimeP = loadLog('../../test.csv')
 
     for i, s in enumerate(statesP):
         if abs(s[0, 2]) < 0.25:
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             index2 = TimeP[i]
             break
 
-    TimeP.pop(len(TimeP)-1)
+    #TimeP.pop(len(TimeP)-1)
     XM = [s[0, 0] for s in statesM]
     XdotM = [s[0, 1] for s in statesM]
     ThetaM = [s[0, 2] for s in statesM]
@@ -89,6 +89,7 @@ if __name__ == "__main__":
     maxTheta = max(ThetadotM) if abs(max(ThetadotM)) >= abs(min(ThetadotM)) else min(ThetadotM)
     axs[3].set_ylim(-1.1 * abs(maxTheta), 1.1 * abs(maxTheta))
 
+    TimeP = TimeP[1:]
     axs[4].plot(TimeM, pwmM, c='r')
     axs[4].plot(TimeP, pwmP, c='b')
     axs[4].axvline(x=index, color='g', label='axvline - full height')

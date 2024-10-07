@@ -45,13 +45,19 @@ class CombinedAgent:
 
             pwm = np.clip(pwm, -0.5, 0.5)
             return pwm
+
         else:
             a = self.a2.predict(state)
             if a.size == 4:
                 s = state.reshape(1, -1).copy()
+                #print(s)
                 a = -(a.reshape(1, -1)@s.T)[0, 0]
+                #print(a)
                 a_fric = a + np.sign(a) * self.a1.env.params[8]
+                #print(a_fric)
                 pwm = a_fric / self.a1.env.params[7]
+                #print(pwm)
                 pwm = np.clip(pwm, -0.5, 0.5)
+                #input()
                 return np.array([pwm])
             else: return a
