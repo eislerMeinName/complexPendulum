@@ -6,6 +6,7 @@ import numpy as np
 
 
 class DirectPendulum(ComplexPendulum):
+    """Gym environment that models Direct PWM control of the pendulum with matching preprocessing."""
 
     def __init__(self,
                  frequency: float = 100,

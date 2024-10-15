@@ -406,7 +406,7 @@ class ComplexPendulum(gym.Env):
 
     def __str__(self) -> str:
         """Returns a string with condensed info of environment."""
-        general: str = f"\nEnvironment: {self.__class__.__name__}\nObservationSpace: {self.observation_space} \nActionSpace: {self.action_space} \nActionType: {self.actiontype.__class__.__name__} \nRewardType: {self.rewardtype.__class__.__name__} \n Params: {self.params}"
+        general: str = f"\nEnvironment: {self.__class__.__name__}\nObservationSpace: {self.observation_space} \nActionSpace: {self.action_space} \nActionType: {self.actiontype.__class__.__name__} \nRewardType: {self.rewardtype.__class__.__name__} \nParams: {self.params}"
         return general
 
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None, ) -> tuple[ObsType, dict[str, Any]]:

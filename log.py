@@ -2,19 +2,20 @@ import gymnasium as gym
 import numpy as np
 import time
 
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, PPO
 
 from complexPendulum.agents import LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
+from complexPendulum.agents.neuralAgents import nAgent1
 from complexPendulum.assets import ActionType, RewardType, EvalSetup
 from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup6
 
 DEFAULT_STEPS: int = 100000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 60
+DEFAULT_EPISODE_LEN: float = 30
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
-DEFAULT_S0: np.array = None
+DEFAULT_S0: np.array = np.array([0, 0, 0.1, 0])
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/best_model'
 DEFAULT_GUI: bool = True
@@ -32,14 +33,14 @@ def run(frequency: float = DEFAULT_FREQ,
         log: bool = DEFAULT_LOG,
         name: str = DEFAULT_NAME) -> None:
 
-    agent = NeuralAgent({"Agent": SAC.load(name)})
-    #actiontype = ActionType.DIRECT if agent.action_space.shape == (1,) else ActionType.GAIN
+
     eval_env = gym.make(DEFAULT_ENV, frequency=frequency,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R,
                         rewardtype=setup.func, s0=s0, gui=gui,
                         friction=friction, log=log, render_mode="human", actiontype=ActionType.GAIN)
-    print(eval_env.unwrapped)
+
+    agent = NeuralAgent({"Agent": PPO.load(name)}, LQAgent(eval_env.unwrapped).K)
 
     state, _ = eval_env.reset()
     done = False

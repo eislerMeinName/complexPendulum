@@ -1,12 +1,14 @@
 from typing import Tuple
-
-from complexPendulum.envs.PendulumEnv import ComplexPendulum
-from complexPendulum.assets import RewardType, ActionType
 import numpy as np
+import control as ct
+
+from complexPendulum.agents import LQAgent
+from complexPendulum.envs import ComplexPendulum
+from complexPendulum.assets import RewardType, ActionType
 
 
-class GainPendulum(ComplexPendulum):
-    """Gym environment that preporcces the actions to gains in the range of [-100, 0]."""
+class BaselineGainPendulum(ComplexPendulum):
+    """Gym environment that models baselined GainPendulum control."""
 
     def __init__(self,
                  frequency: float = 100,
@@ -57,21 +59,24 @@ class GainPendulum(ComplexPendulum):
                          actiontype=ActionType.GAIN, rewardtype=rewardtype,
                          s0=s0, friction=friction, log=log, conditionReward=conditionReward, render_mode=render_mode)
 
+        self.K = ct.lqr(self.getLinearSS(), self.Q, self.R)
+
     def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
         """The step function simulates a single control step in the environment.
-        Input:
-            action: np.array
-                The action chosen by the agent.
+                Input:
+                    action: np.array
+                        The action chosen by the agent.
 
-        Return:
-            state: np.array
-                The current state.
-            reward: float
-                The current reward.
-            done: bool
-                Indicating if the environment is finished.
-            info: dict
-                The true answer.
-        """
-        action = (action - 1) * 50
-        return super().step(action)
+                Return:
+                    state: np.array
+                        The current state.
+                    reward: float
+                        The current reward.
+                    done: bool
+                        Indicating if the environment is finished.
+                    info: dict
+                        The true answer.
+                """
+
+        action = action / 2
+        return super().step(self.K + action * self.K)

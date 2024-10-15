@@ -19,7 +19,7 @@ def run(name: str = DEFAULT_NAME) -> None:
                    rewardtype=setup.func, s0=np.array([0, 0, np.pi + 0.01, 0]), gui=True,
                    friction=True, log=False, render_mode="rgb_array")
 
-    neural = NeuralAgent(nAgent2)
+    neural = NeuralAgent(nAgent2, None)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, neural)
 

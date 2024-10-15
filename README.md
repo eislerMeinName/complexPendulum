@@ -1,9 +1,9 @@
 # complexPendulum
 ComplexPendulum is a detailed gym environment of the inverted pendulum RL environment. 
-It aims at modelling real-world pendulum systems as accurate as possible.
+It aims at modelling real-world pendulum systems as accurate as possible including static friction.
 
 > ### Currently under construction...
-> - find training and evaluation setups
+> CAN YOU BE BETTER THAN LQ CONTROL SYNTHESIS???
 
 
 <p align="center">
@@ -65,7 +65,7 @@ Overview of Parameters:
 >>>     log: bool = True)                               #log step response
 ```
 
-For Training please use DirectPendulum or GainPendulum environment.
+For Training please use DirectPendulum, GainPendulum, or BaselineGainPendulum environment depending on the desired ActionSpace.
 
 ### XML-Parameter
 If you want to specify different kinematic parameters of a pendulum, edit params.xml file
@@ -88,7 +88,7 @@ or write a new XML file as input to the environment.
 ### ActionTypes
 The ActionType models the action of the agent.
 - DIRECT: directly apply pwm (dim 1)
-- GAIN: apply proportional gain (dim 4)
+- GAIN: apply proportional gain (dim 4) either in [-100, 0] or baselined by proportional controller
 
 ### RewardTypes
 The RewardTypes specify the reward function of the environment.
@@ -139,6 +139,13 @@ Generate a video of a trajectory threw the environment.
 
 ## Parameter Calculation Script
 Calculates the necessary parameter for your xml file based on simpler parameters, that are easier to identify.
+
+## Use in Matlab/ Simulink
+Just decide on an own training setup, pick the environment matching the desired action space, etc.
+Learn your Agent with a stable-baselines3 algorithm. Currently, the neural agent class only support PPO and SAC.
+During training you can observe the agent by executing the log script.
+After training, evaluating the agent is recommended. At last, save the parameters of your neural agent in a .mat file.
+Load your .mat file in the Matlab Init file. Now you can either observe your agent in the Simulink simulation or directly apply it to the real world system.
 
 > ## Citation
 > Nothing to cite, yet...

@@ -21,7 +21,7 @@ if __name__ == "__main__":
                    conditionReward=False)
     lq = LQAgent(env.unwrapped)
     print(lq.K)
-    neural = NeuralAgent(nAgent2)
+    neural = NeuralAgent(nAgent2, None)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 

@@ -3,8 +3,9 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, PPO
 from stable_baselines3.sac.policies import SACPolicy
+from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.env_util import make_vec_env
@@ -46,6 +47,9 @@ def run(steps: int = DEFAULT_STEPS,
 
     train_env = make_vec_env(DEFAULT_ENV, n_envs=4, seed=0, env_kwargs=env_kwargs)
 
+    onpolicy_kwargs: dict = dict(activation_fn=torch.nn.ReLU,
+                                 net_arch=[dict(vf=[256, 256, 128], pi=[256, 256, 64])])
+
     offpolicy_kwargs: dict = dict(activation_fn=torch.nn.ReLU,
                                   net_arch=[32, 16])
 
@@ -55,6 +59,13 @@ def run(steps: int = DEFAULT_STEPS,
                 tensorboard_log='results/tb/',
                 verbose=1,
                 train_freq=1, gradient_steps=2
+                )
+
+    agent = PPO(ActorCriticPolicy,
+                train_env,
+                policy_kwargs=onpolicy_kwargs,
+                tensorboard_log='results/tb/',
+                verbose=1
                 )
 
     eval_env = make_vec_env(DEFAULT_ENV, env_kwargs=env_kwargs, n_envs=4, seed=0)
