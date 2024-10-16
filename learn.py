@@ -48,18 +48,10 @@ def run(steps: int = DEFAULT_STEPS,
     train_env = make_vec_env(DEFAULT_ENV, n_envs=4, seed=0, env_kwargs=env_kwargs)
 
     onpolicy_kwargs: dict = dict(activation_fn=torch.nn.ReLU,
-                                 net_arch=[dict(vf=[256, 256, 128], pi=[256, 256, 64])])
+                                 net_arch=dict(vf=[128, 64, 32], pi=[128, 64, 32]))
 
     offpolicy_kwargs: dict = dict(activation_fn=torch.nn.ReLU,
-                                  net_arch=[32, 16])
-
-    agent = SAC(SACPolicy,
-                train_env,
-                policy_kwargs=offpolicy_kwargs,
-                tensorboard_log='results/tb/',
-                verbose=1,
-                train_freq=1, gradient_steps=2
-                )
+                                  net_arch=[128, 64, 32])
 
     agent = PPO(ActorCriticPolicy,
                 train_env,
