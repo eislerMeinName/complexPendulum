@@ -2,8 +2,8 @@
 ComplexPendulum is a detailed gym environment of the inverted pendulum RL environment. 
 It aims at modelling real-world pendulum systems as accurate as possible including static friction.
 
-> ### Currently under construction...
-> CAN YOU BE BETTER THAN LQ CONTROL SYNTHESIS???
+
+> ### CAN YOU BE BETTER THAN LQ CONTROL SYNTHESIS???
 
 
 <p align="center">
