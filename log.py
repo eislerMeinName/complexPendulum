@@ -6,16 +6,16 @@ from stable_baselines3 import SAC, PPO
 
 from complexPendulum.agents import LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent1
+from complexPendulum.agents.neuralAgents import nAgent1, nAgent2, nAgent3
 from complexPendulum.assets import ActionType, RewardType, EvalSetup
-from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5, Setup6
+from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
 
 DEFAULT_STEPS: int = 100000
 DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 30
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
-DEFAULT_S0: np.array = np.array([0, 0, 0.1, 0])
+DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/best_model'
 DEFAULT_GUI: bool = True
@@ -38,9 +38,10 @@ def run(frequency: float = DEFAULT_FREQ,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R,
                         rewardtype=setup.func, s0=s0, gui=gui,
-                        friction=friction, log=log, render_mode="human", actiontype=ActionType.GAIN)
+                        friction=friction, log=log, render_mode="human", actiontype=ActionType.DIRECT)
 
-    agent = NeuralAgent({"Agent": PPO.load(name)}, LQAgent(eval_env.unwrapped).K)
+    #agent = NeuralAgent({"Agent": PPO.load(name)}, LQAgent(eval_env.unwrapped).K)
+    agent = NeuralAgent(nAgent3, None)
 
     state, _ = eval_env.reset()
     done = False

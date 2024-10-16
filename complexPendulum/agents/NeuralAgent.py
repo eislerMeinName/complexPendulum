@@ -44,6 +44,9 @@ class NeuralAgent:
         self.AS = agentDict["Action"]
         self.agentDict = agentDict
         self.loadSAC(model) if self.algo == "SAC" else self.loadPPO(model)
+        if torch.cuda.is_available():
+            self.policy = self.policy.to('cpu')
+            self.mu = self.mu.to('cpu')
 
     def loadSAC(self, model) -> None:
         self.policy = model.policy.actor.latent_pi
@@ -63,9 +66,10 @@ class NeuralAgent:
             action: np.array
                 The action.
         """
-
+        
         with torch.no_grad():
-            p = self.policy(torch.from_numpy(state).to(torch.float32))
+            s = torch.from_numpy(state).to(torch.float32)
+            p = self.policy(s)
             mu = self.mu(p)
             a = torch.tanh(mu).numpy()
             if self.AS == "Direct":
