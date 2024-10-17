@@ -2,10 +2,6 @@ from scipy.io import savemat
 import numpy as np
 import torch
 from stable_baselines3 import SAC, PPO
-from sympy.physics.vector.printing import params
-
-from complexPendulum.agents import LQAgent
-from complexPendulum.envs import ComplexPendulum, GainPendulum, DirectPendulum, BaselineGainPendulum
 
 
 class NeuralAgent:

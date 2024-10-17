@@ -12,9 +12,9 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
 
 DEFAULT_STEPS: int = 100000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 30
+DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
-DEFAULT_SETUP: EvalSetup = Setup1
+DEFAULT_SETUP: EvalSetup = Setup2
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/best_model'
@@ -38,16 +38,19 @@ def run(frequency: float = DEFAULT_FREQ,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R,
                         rewardtype=setup.func, s0=s0, gui=gui,
-                        friction=friction, log=log, render_mode="human", actiontype=ActionType.DIRECT)
+                        friction=friction, log=log, render_mode="human", actiontype=ActionType.GAIN)
 
-    #agent = NeuralAgent({"Agent": PPO.load(name)}, LQAgent(eval_env.unwrapped).K)
-    agent = NeuralAgent(nAgent3, None)
+    agent = NeuralAgent({"Agent": PPO.load(name), "Action": "Base"}, LQAgent(eval_env.unwrapped).K)
 
     state, _ = eval_env.reset()
     done = False
     trun = False
     t00 = time.time()
+    t0 = time.time_ns()
     while not done and not trun:
+        while time.time_ns()-t0 < 10000000:
+            pass
+        t0 = time.time_ns()
         action = agent.predict(state)
         state, rew, done, trun, _ = eval_env.step(action)
 

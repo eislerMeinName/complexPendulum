@@ -55,11 +55,11 @@ class BaselineGainPendulum(ComplexPendulum):
         """
 
         super().__init__(frequency=frequency, episode_len=episode_len,
-                         path=path, Q=Q, R=R, gui=gui,
+                         path=path, Q=Q*10, R=R*10, gui=gui,
                          actiontype=ActionType.GAIN, rewardtype=rewardtype,
                          s0=s0, friction=friction, log=log, conditionReward=conditionReward, render_mode=render_mode)
 
-        self.K = ct.lqr(self.getLinearSS(), self.Q, self.R)
+        self.K, _, _ = ct.lqr(self.getLinearSS(), self.Q, self.R)
 
     def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
         """The step function simulates a single control step in the environment.

@@ -1,11 +1,14 @@
+from distutils.core import setup
+
 import numpy as np
 import gymnasium as gym
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+from stable_baselines3 import SAC, PPO
 
 from complexPendulum.agents import ProportionalAgent, LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent2, nAgent1
+from complexPendulum.agents.neuralAgents import nAgent2, nAgent1, nAgent3
 from complexPendulum.assets import Setup1, Setup2, Setup3, Evaluator, ActionType, EvaluationDataType
 from complexPendulum.envs import ComplexPendulum
 
@@ -89,5 +92,6 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 if __name__ == "__main__":
     #agent = LQAgent(ComplexPendulum(Q=Setup1.Q, R=Setup1.R))
-    agent = NeuralAgent(nAgent2)
+    #agent = NeuralAgent(nAgent3, None)
+    agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
     run(1000, agent)
