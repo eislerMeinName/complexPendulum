@@ -5,7 +5,7 @@
 
 	%Fs = 0;                % Uncomment to simulate model without static friction
 
-    x0 = [0; 0; 0.15; 0]; % Initial state of pendulum [ x[m], xdot[m/s], theta[rad], thetadot[rad/s] ]
+    x0 = [0; 0; pi + 0.01; 0]; % Initial state of pendulum [ x[m], xdot[m/s], theta[rad], thetadot[rad/s] ]
 
     sigmaCart = 0.0;        % Standard deviation of normally distributed measurement noise for cart encoder [m]
     sigmaPend = 0.0;        % Standard deviation of normally distributed measurement noise for pendulum encoder [rad]
@@ -34,7 +34,7 @@
      [0, 0, 1, 0]];
 
  Q = eye(4);
- R = 1;
+ R = 1/10;
  %Q = [240, 0, 0, 0; 0, 180, 0, 0; 0, 0, 12, 0; 0, 0, 0, 19]
  %R = 1;
 
@@ -60,5 +60,5 @@
 
 %% ************************************************************************
 % Parameters of neural agent
-load Setup1SacGain
+load Setup2PPODirect.mat
 

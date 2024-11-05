@@ -1,13 +1,14 @@
 from typing import Tuple
 import numpy as np
 import control as ct
+from gymnasium import spaces
 
 from complexPendulum.envs import ComplexPendulum
 from complexPendulum.assets import RewardType, ActionType
 
 
-class BaselineGainPendulum(ComplexPendulum):
-    """Gym environment that models baselined GainPendulum control."""
+class EasyBaselinePendulum(ComplexPendulum):
+    """Gym environment that models 1D baselined GainPendulum control."""
 
     def __init__(self,
                  frequency: float = 100,
@@ -59,6 +60,8 @@ class BaselineGainPendulum(ComplexPendulum):
                          s0=s0, friction=friction, log=log, conditionReward=conditionReward, render_mode=render_mode)
 
         self.K, _, _ = ct.lqr(self.getLinearSS(), self.Q, self.R)
+        self.action_space: spaces = spaces.Box(low=-np.ones(1),
+                                               high=np.ones(1), dtype=np.float32)
 
     def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
         """The step function simulates a single control step in the environment.
@@ -77,5 +80,5 @@ class BaselineGainPendulum(ComplexPendulum):
                         The true answer.
                 """
 
-        action = action / 2
+        action = action[0] / 2
         return super().step(self.K + action * self.K)

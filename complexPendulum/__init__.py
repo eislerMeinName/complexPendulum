@@ -19,3 +19,8 @@ gym.envs.register(
         id='baselinePendulum-v0',
         entry_point='complexPendulum.envs:BaselineGainPendulum'
     )
+
+gym.envs.register(
+        id='easybaselinePendulum-v0',
+        entry_point='complexPendulum.envs:EasyBaselinePendulum'
+    )

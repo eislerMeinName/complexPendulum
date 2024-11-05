@@ -82,6 +82,8 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
         if len(evaluationData[k]) != 0:
             print(f"{k}: {np.mean(evaluationData[k])} ± {np.std(evaluationData[k])}")
 
+    print(failX)
+    print(failT)
     plt.scatter(failX, failT, c=failtimes)
     plt.xlim(-0.5, 0.5)
     plt.ylim(-0.3, 0.3)
@@ -91,7 +93,7 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 
 if __name__ == "__main__":
-    #agent = LQAgent(ComplexPendulum(Q=Setup1.Q, R=Setup1.R))
+    agent = LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R))
     #agent = NeuralAgent(nAgent3, None)
-    agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
-    run(1000, agent)
+    #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
+    run(100, agent)
