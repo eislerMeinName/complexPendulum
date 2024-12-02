@@ -28,18 +28,21 @@ def loadMatlabLog(path: str) -> tuple:
 
 
 if __name__ == "__main__":
-    statesM, pwmM, _, TimeM = loadMatlabLog('swingupM.csv')
-    statesP, pwmP, _, TimeP = loadLog('../../test.csv')
+    statesM, pwmM, _, TimeM = loadMatlabLog('../data/step/Kontrolle.csv')
+    statesP, pwmP, _, TimeP = loadLog('../data/step/stepsim.csv')
 
-    for i, s in enumerate(statesP):
-        if abs(s[0, 2]) < 0.25:
-            index = TimeP[i]
-            break
+    time = 0
+    index = 0
 
     for i, s in enumerate(statesM):
         if abs(s[0, 2]) < 0.25:
-            index2 = TimeP[i]
+            time = TimeM[i]
+            index = i
             break
+
+    statesM = statesM[i:]
+    pwmM = pwmM[i:]
+    TimeM = np.array(TimeM[i:]) - time
 
     #TimeP.pop(len(TimeP)-1)
     XM = [s[0, 0] for s in statesM]
@@ -52,50 +55,51 @@ if __name__ == "__main__":
     ThetaP = [s[0, 2] for s in statesP]
     ThetadotP = [s[0, 3] for s in statesP]
 
-    fig, axs = plt.subplots(5, 1)
+    fig, axs = plt.subplots(4, 1)
     fig.tight_layout()
-    title: str = 'Comparison of Simulations'
+    title: str = 'Comparison of Step Response'
     fig.suptitle(title, fontsize=15)
 
     dot = '\u0307'
-    axs[0].plot(TimeM, XM, c='r')
-    axs[0].plot(TimeP, XP, c='b')
-    axs[0].axvline(x=index, color='g', label='axvline - full height')
-    axs[0].axvline(x=index2, color='g', label='axvline - full height')
+    axs[0].plot(TimeM, XM, c='r', label='RealWorld')
+    axs[0].plot(TimeP, XP, '--', c='b', label='Simulation')
+    #axs[0].axvline(x=index, color='g', label='axvline - full height')
+    #axs[0].axvline(x=index2, color='g', label='axvline - full height')
     axs[0].set_xlabel('t [s]')
     axs[0].set_ylabel('X [m]')
-    axs[0].set_ylim(-1, 1.)
+    maxX = max(XM) if abs(max(XM)) >= abs(min(XM)) else min(XM)
+    axs[0].set_ylim(-1.1 * abs(maxX), 1.1 * abs(maxX))
+    axs[0].set_xlim(0, 10)
 
-    axs[1].plot(TimeM, XdotM, c='r')
-    axs[1].plot(TimeP, XdotP, c='b')
-    axs[1].axvline(x=index, color='g', label='axvline - full height')
+    axs[1].plot(TimeM, XdotM, c='r', label='RealWorld')
+    axs[1].plot(TimeP, XdotP, '--', c='b', label='Simulation')
+    #axs[1].axvline(x=index, color='g', label='axvline - full height')
     axs[1].set_xlabel('t [s]')
     axs[1].set_ylabel('X' + dot + ' [m/s]')
     maxX = max(XdotM) if abs(max(XdotM)) >= abs(min(XdotM)) else min(XdotM)
     axs[1].set_ylim(-1.1 * abs(maxX), 1.1 * abs(maxX))
+    axs[1].set_xlim(0, 10)
 
-    axs[2].plot(TimeM, ThetaM, c='r')
-    axs[2].plot(TimeP, ThetaP, c='b')
-    axs[2].axvline(x=index, color='g', label='axvline - full height')
+    axs[2].plot(TimeM, ThetaM, c='r', label='RealWorld')
+    axs[2].plot(TimeP, ThetaP, '--', c='b', label='Simulation')
+    #axs[0].axvline(x=index, color='g', label='axvline - full height')
     axs[2].set_xlabel('t [s]')
     axs[2].set_ylabel(r'$\theta$')
-    axs[2].set_ylim(-1.1 * np.pi, 1.1 * np.pi)
+    axs[2].set_ylim(1.2*min(ThetaM), 1.2*max(np.array(ThetaM)))
+    axs[2].set_xlim(0, 10)
 
-    axs[3].plot(TimeM, ThetadotM, c='r')
-    axs[3].plot(TimeP, ThetadotP, c='b')
-    axs[3].axvline(x=index, color='g', label='axvline - full height')
+    axs[3].plot(TimeM, ThetadotM, c='r', label="RealWorld")
+    axs[3].plot(TimeP, ThetadotP, '--', c='b', label="Simulation")
+    #axs[3].axvline(x=index, color='g', label='axvline - full height')
     axs[3].set_xlabel('t [s]')
     axs[3].set_ylabel(r'$\dot{\theta}$ [m/s]')
     maxTheta = max(ThetadotM) if abs(max(ThetadotM)) >= abs(min(ThetadotM)) else min(ThetadotM)
     axs[3].set_ylim(-1.1 * abs(maxTheta), 1.1 * abs(maxTheta))
+    axs[3].set_xlim(0, 10)
 
-    TimeP = TimeP[1:]
-    axs[4].plot(TimeM, pwmM, c='r')
-    axs[4].plot(TimeP, pwmP, c='b')
-    axs[4].axvline(x=index, color='g', label='axvline - full height')
-    axs[4].set_xlabel('t [s]')
-    axs[4].set_ylabel('pwm')
-    axs[4].set_ylim(-0.7, 0.7)
+    axs[0].legend()
+    axs[1].legend()
+    axs[2].legend()
+    axs[3].legend()
 
     plt.show()
-

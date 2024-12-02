@@ -2,9 +2,9 @@ import gymnasium as gym
 import numpy as np
 import time
 
-from stable_baselines3 import SAC, PPO
+from pandas.core.interchange.from_dataframe import primitive_column_to_ndarray
 
-from complexPendulum.agents import LQAgent
+from complexPendulum.agents import LQAgent, CombinedAgent, SwingUpAgent, ProportionalAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
 from complexPendulum.agents.neuralAgents import nAgent1, nAgent2, nAgent3, nAgent4
 from complexPendulum.assets import ActionType, RewardType, EvalSetup
@@ -12,10 +12,10 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
 
 DEFAULT_STEPS: int = 100000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 30
+DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
-DEFAULT_SETUP: EvalSetup = Setup2
-DEFAULT_S0: np.array = None
+DEFAULT_SETUP: EvalSetup = Setup1
+DEFAULT_S0: np.array = np.array([0.177913818359375,0.27539062,0.2454369260617026,-0.46019424])
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/best_model'
 DEFAULT_GUI: bool = True
@@ -40,25 +40,29 @@ def run(frequency: float = DEFAULT_FREQ,
                         rewardtype=setup.func, s0=s0, gui=gui,
                         friction=friction, log=log, render_mode="human", actiontype=ActionType.DIRECT)
 
-    agent = NeuralAgent(nAgent3, LQAgent(eval_env.unwrapped).K)
+    #agent = NeuralAgent(nAgent3, LQAgent(eval_env.unwrapped).K)
+    #lq = LQAgent(eval_env.unwrapped)
+    a = ProportionalAgent(np.array([-1, -3.0256, -23.7068, -4.4886]))
+    swingup = SwingUpAgent(eval_env.unwrapped)
+    agent = CombinedAgent(swingup, a)
 
     state, _ = eval_env.reset()
     done = False
     trun = False
     t00 = time.time()
     t0 = time.time_ns()
-    while not done and not trun:
+    while not trun:
         while time.time_ns()-t0 < 10000000:
             pass
         t0 = time.time_ns()
         action = agent.predict(state)
-        #input(action)
         state, rew, done, trun, _ = eval_env.step(action)
 
+    print(state)
     print(str(round(time.time() - t00, 5)) + 's')
-
     eval_env.unwrapped.stats()
-    eval_env.unwrapped.logger.write(name.replace('results/', 'logs/').replace('.zip', '.csv'))
+    path = name.replace('results/', 'logs/')
+    eval_env.unwrapped.logger.write(path + ".csv")
     eval_env.close()
 
 

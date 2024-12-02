@@ -40,8 +40,9 @@ class CombinedAgent:
 
         if not self.min1 < state[2] < self.max1:
             force =  self.a1.predict(state)
-            a_fric = force + np.sign(force) * self.a1.env.params[8]
-            pwm = a_fric / self.a1.env.params[7]
+            M0 = self.a1.env.params[7]
+            M1 = self.a1.env.params[6]
+            pwm = ((force - M0) / M1)
 
             pwm = np.clip(pwm, -0.5, 0.5)
             return pwm
@@ -50,14 +51,10 @@ class CombinedAgent:
             a = self.a2.predict(state)
             if a.size == 4:
                 s = state.reshape(1, -1).copy()
-                #print(s)
                 a = -(a.reshape(1, -1)@s.T)[0, 0]
-                #print(a)
-                a_fric = a + np.sign(a) * self.a1.env.params[8]
-                #print(a_fric)
-                pwm = a_fric / self.a1.env.params[7]
-                #print(pwm)
+                M0 = self.a1.env.params[7]
+                M1 = self.a1.env.params[6]
+                pwm = (a - M0) / M1
                 pwm = np.clip(pwm, -0.5, 0.5)
-                #input()
                 return np.array([pwm])
             else: return a

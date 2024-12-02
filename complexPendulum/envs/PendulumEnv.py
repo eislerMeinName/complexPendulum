@@ -87,8 +87,8 @@ class ComplexPendulum(gym.Env):
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
 
-        pos: float = round(self.state[0] / self.params[9]) * self.params[9]
-        angle: float = round(self.state[2] / self.params[10]) * self.params[10]
+        pos: float = round(self.state[0] / self.params[8]) * self.params[8]
+        angle: float = round(self.state[2] / self.params[9]) * self.params[9]
         self.last_state = np.array([pos, self.state[1], angle, self.state[3]])
 
         self.actiontype = actiontype
@@ -161,6 +161,7 @@ class ComplexPendulum(gym.Env):
         if self.conditionReward:
             angle = np.arctan2(np.sin(self.state[2]), np.cos(self.state[2]))
             if abs(angle) > 0.3 or abs(self.state[0]) > 0.7:
+                self.STEPS -= 1
                 return True, False
         self.STEPS -= 1
         return False, False
@@ -183,9 +184,9 @@ class ComplexPendulum(gym.Env):
         x_dot_s = state[1]
         theta_s = state[2]
         theta_dot_s = state[3]
-        sign = lambda x: np.tanh(10000 * x)
-        F = force - sign(state[1]) * self.params[8]
-        mp, l, J, m, fp, fc, g, _, _, _, _ = self.params
+        F = force
+
+        g, m, mc, mp, l, J, _, _, _, _, ep, ec, muc, mus= self.params
 
         d = 1 - (mp**2 * l**2 / (J * m)) * np.cos(theta_s)**2
 
@@ -194,11 +195,11 @@ class ComplexPendulum(gym.Env):
 
         x_dot = x_dot_s
         x_ddot = F / m - mp * mp * l * l * g * sinT * cosT / (
-                J * m) + mp * l * theta_dot_s * theta_dot_s * sinT / m + mp * l * fp * theta_dot_s * cosT / (J * m) - fc * x_dot_s / m
+                J * m) + mp * l * theta_dot_s * theta_dot_s * sinT / m + mp * l * ep * theta_dot_s * cosT / (J * m) - ec * x_dot_s / m
         theta_dot = theta_dot_s
         theta_ddot = mp * l * g * sinT / J - mp * l * F * cosT / (
                 J * m) - mp * mp * l * l * theta_dot_s * theta_dot_s * sinT * cosT / (
-                             J * m) + mp * l * fc * x_dot_s * cosT / (J * m) - fp * theta_dot_s / J
+                             J * m) + mp * l * ec * x_dot_s * cosT / (J * m) - ep * theta_dot_s / J
 
         return np.array([x_dot, x_ddot / d, theta_dot, theta_ddot / d])
 
@@ -222,7 +223,9 @@ class ComplexPendulum(gym.Env):
         pwm = self.preprocessAction(action)
         force = self.pwmToEffectiveForce(pwm)
 
-        s = odeint(self.intStepOde, y0=self.state, t=self.t, args=(force,))
+
+        s = odeint(self.intStepOde, y0=self.state, t=self.t, args=(force, ))
+
         self.state = np.array(s[-1], dtype=np.float64)
 
         self.time += 1 / self.frequency
@@ -254,23 +257,26 @@ class ComplexPendulum(gym.Env):
         obs = self.last_state.reshape(1, -1).copy()
         a = a[0] if self.actiontype == ActionType.DIRECT else -(a.reshape(1, -1) @ obs.T)[0, 0]
 
-        a_fric = a + np.sign(a) * self.params[8]
-        pwm = a_fric / self.params[7]
+        M0 = self.params[7]
+        M1 = self.params[6]
+        pwm = (a - M0) / M1
 
         pwm = np.clip(pwm, -0.5, 0.5)
 
         return pwm if self.actiontype == ActionType.GAIN else a
 
     def pwmToEffectiveForce(self, pwm: float) -> float:
-        force = pwm * self.params[7]
-        if abs(force) <= self.params[8]:
-            force = 0
-        elif force > self.params[8]:
-            force = force - self.params[8]
-        else:
-            force = force + self.params[8]
+        g, m , mc, mp, l, J, M1, M0, _, _, ep, ec, muc, mus = self.params
+        deadzone = 0.001
 
-        return force
+        force = pwm * M1 + M0 if abs(pwm) > deadzone else 0
+
+        Fstatatic = -force if abs(force) < mus else -mus * np.sign(force)
+        Fcoulomb = -muc * (mc + mp) * g * np.sign(self.state[1])
+        #if abs(self.state[1]) < 0.01:
+        #    input(self.state[1])
+
+        return force + Fstatatic if np.allclose(self.state[1], 0.0) else force + Fcoulomb
 
     def observe(self) -> np.array:
         """Returns the observation based on the current state.
@@ -279,8 +285,8 @@ class ComplexPendulum(gym.Env):
                 The observation.
         """
 
-        pos: float = round(self.state[0] / self.params[9]) * self.params[9]
-        angle: float = round(self.state[2] / self.params[10]) * self.params[10]
+        pos: float = round(self.state[0] / self.params[8]) * self.params[8]
+        angle: float = round(self.state[2] / self.params[9]) * self.params[9]
         vel: float = (pos - self.last_state[0]) * self.frequency
         angledif: float = 0 if np.allclose(angle, self.last_state[2]) else angle - self.last_state[2]
         anglevel: float = np.arctan2(np.sin(angledif), np.cos(angledif)) * self.frequency
@@ -356,39 +362,26 @@ class ComplexPendulum(gym.Env):
             path: str
                 The path to the xml parameter file.
         Returns:
-            mp: float
-                The mass of the pendulum.
-            l: float
-                The distance between the mounting point and the center of mass of the pendulum.
-            J: float
-                The moment of inertia.
-            m: float
-                The total mass.
-            fp: float
-                The friction coefficient for the pendulum.
-            fc: float
-                The friction coefficient for the cart.
-            g: float
-                The gravitational acceleration.
-            M: float
-                PWM to effective force coefficient.
-            Fs: float
-                The static friction.
+            params: tuple of params
         """
 
         XML_TREE = etxml.parse(path).getroot()
-        Fs = float(XML_TREE.attrib['Fs']) if self.friction else 0
-        return float(XML_TREE.attrib['mp']), \
+        mus = float(XML_TREE.attrib['mus']) if self.friction else 0
+
+        return float(XML_TREE.attrib['g']), \
+            float(XML_TREE.attrib['m']), \
+            float(XML_TREE.attrib['mc']), \
+            float(XML_TREE.attrib['mp']), \
             float(XML_TREE.attrib['l']), \
             float(XML_TREE.attrib['J']), \
-            float(XML_TREE.attrib['m']), \
-            float(XML_TREE.attrib['fp']), \
-            float(XML_TREE.attrib['fc']), \
-            float(XML_TREE.attrib['g']), \
-            float(XML_TREE.attrib['M']), \
-            Fs, \
-            float(XML_TREE.attrib['xquant']), \
-            float(XML_TREE.attrib['thetaquant'])
+            float(XML_TREE.attrib['M1']), \
+            float(XML_TREE.attrib['M0']), \
+            float(XML_TREE.attrib['qx']), \
+            float(XML_TREE.attrib['qt']), \
+            float(XML_TREE.attrib['ep']), \
+            float(XML_TREE.attrib['ec']), \
+            float(XML_TREE.attrib['muc']), \
+            mus
 
     def stats(self) -> None:
         """Shows the logged step response data."""
@@ -419,9 +412,9 @@ class ComplexPendulum(gym.Env):
         self.STEPS = self.episode_len * self.frequency
         self.time = 0
         self.state = self.sampleS0() if self.s0 is None else self.s0.copy()
-        pos: float = round(self.state[0] / self.params[9]) * self.params[9]
+        pos: float = round(self.state[0] / self.params[8]) * self.params[8]
         angle = np.arctan2(np.sin(self.state[2]), np.cos(self.state[2]))
-        angle: float = round(angle / self.params[10]) * self.params[10]
+        angle: float = round(angle / self.params[9]) * self.params[9]
         self.last_state = np.array([pos, self.state[1], angle, self.state[3]], dtype=np.float64)
 
         if self.gui:
@@ -438,13 +431,13 @@ class ComplexPendulum(gym.Env):
                 The state space model.
         """
 
-        mp, l, J, m, fp, fc, g, _, _, _, _ = self.params
+        g, m, mc, mp, l, J, M1, M0, _, _, ep, ec, muc, mus = self.params
         k = 1 / (1 - (mp * mp * l * l) / (J * m))
 
         A = [[0, 1, 0, 0],
-             [0, -k * fc / m, -k * g * (mp * mp * l * l) / (J * m), k * fp * (mp * l) / (J * m)],
+             [0, -k * ec / m, -k * g * (mp * mp * l * l) / (J * m), k * ep * (mp * l) / (J * m)],
              [0, 0, 0, 1],
-             [0, k * fc * (mp * l) / (J * m), k * g * (mp * l) / J, -k * fp / J]]
+             [0, k * ec * (mp * l) / (J * m), k * g * (mp * l) / J, -k * ep / J]]
 
         B = [[0],
              [k / m],
