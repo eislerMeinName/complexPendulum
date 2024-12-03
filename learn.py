@@ -15,11 +15,11 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
 
 EPISODE_REWARD_THRESHOLD = 0
 
-DEFAULT_STEPS: int = 1000000
+DEFAULT_STEPS: int = 200000
 DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
-DEFAULT_SETUP: EvalSetup = Setup2
+DEFAULT_SETUP: EvalSetup = Setup1
 DEFAULT_ACTIONTYPE: ActionType = ActionType.GAIN
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True

@@ -69,6 +69,7 @@ class Evaluator:
             _ = self.evalStep()
         if datatype is EvaluationDataType.SWING_UP:
             _ = self.evalMaxima()
+        _ = self.evalPWM()
 
     def cutData(self, angle: float) -> None:
         """Cuts the data based on the EvaluationDataType and angle.
@@ -138,6 +139,23 @@ class Evaluator:
                 lqr -= (s @ Q @ s.T + self.force[i-1] * R * self.force[i-1])[0, 0]
 
         return lqr
+
+    def evalPWM(self) -> dict:
+        """Evaluates the pwm signals."""
+        avg = np.mean(self.pwm)
+        maximum = np.max(np.abs(self.pwm))
+        minimum = np.min(np.abs(self.pwm))
+        deltas = [self.pwm[i+1] - self.pwm[i] for i in range(0, len(self.pwm)-1)]
+        dmax = np.max(np.abs(np.array(deltas)))
+        davg = np.mean(np.array(deltas))
+        self.data["pwm"] = avg
+        self.data["max pwm"] = maximum
+        self.data["min pwm"] = minimum
+        self.data["pwm delta"] = davg
+        self.data["pwm delta max"] = dmax
+
+        return self.data
+
 
     def evalEXP(self, Q: np.array, R: np.array) -> float:
         """Evaluates the logged episode with undiscounted exponential return.

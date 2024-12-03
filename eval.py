@@ -8,20 +8,22 @@ from stable_baselines3 import SAC, PPO
 
 from complexPendulum.agents import ProportionalAgent, LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent2, nAgent1, nAgent3
+from complexPendulum.agents.neuralAgents import DirectQR1
 from complexPendulum.assets import Setup1, Setup2, Setup3, Evaluator, ActionType, EvaluationDataType
 from complexPendulum.envs import ComplexPendulum
 
 
-def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(nAgent2)) -> None:
+def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(DirectQR1, None)) -> None:
 
     evaluationData = {"Sucess": [],
                       "LQR 1": [],
                       "LQR 2": [],
                       "LQR 3": [],
-                      "pwm_a": [],
+                      "pwm": [],
                       "pwm_max": [],
                       "pwm_min": [],
+                      "pwm_d": [],
+                      "pwm_dmax": [],
                       "xTr": [],
                       "xTm": [],
                       "xdh": [],
@@ -64,7 +66,11 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
             evaluationData["LQR 1"].append(eval.data["LQR 1"])
             evaluationData["LQR 2"].append(eval.data["LQR 2"])
             evaluationData["LQR 3"].append(eval.data["LQR 3"])
-            #pwm eval
+            evaluationData["pwm"].append(eval.data["pwm"])
+            evaluationData["pwm_max"].append(eval.data["max pwm"])
+            evaluationData["pwm_min"].append(eval.data["min pwm"])
+            evaluationData["pwm_d"].append(eval.data["pwm delta"])
+            evaluationData["pwm_dmax"].append(eval.data["pwm delta max"])
 
             if eval.data["X: Tr"] is not None: evaluationData["xTr"].append((eval.data["X: Tr"]))
             if eval.data["X: Tm"] is not None: evaluationData["xTm"].append(eval.data["X: Tm"])
@@ -93,7 +99,8 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 
 if __name__ == "__main__":
-    agent = LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R))
+    agent = LQAgent(ComplexPendulum(Q=Setup1.Q, R=Setup1.R))
     #agent = NeuralAgent(nAgent3, None)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
-    run(100, agent)
+    #agent = NeuralAgent(DirectQR1, None)
+    run(10, agent)

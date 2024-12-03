@@ -55,7 +55,7 @@ class EasyBaselinePendulum(ComplexPendulum):
         """
 
         super().__init__(frequency=frequency, episode_len=episode_len,
-                         path=path, Q=Q*10, R=R*10, gui=gui,
+                         path=path, Q=Q*100, R=R*100, gui=gui,
                          actiontype=ActionType.GAIN, rewardtype=rewardtype,
                          s0=s0, friction=friction, log=log, conditionReward=conditionReward, render_mode=render_mode)
 
