@@ -102,5 +102,5 @@ if __name__ == "__main__":
     #agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
     #agent = NeuralAgent(nAgent3, None)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
-    agent = NeuralAgent(DirectQR2, None)
-    run(1000, agent)
+    agent = NeuralAgent(GainQR1, None)
+    run(10, agent)
