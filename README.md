@@ -92,7 +92,7 @@ The ActionType models the action of the agent.
 
 ### RewardTypes
 The RewardTypes specify the reward function of the environment.
-- LQ models a linear quadratic reward function.
+- QR models a quadratic reward function.
 - EXP models an exponential reward function.
 
 ### Logger
