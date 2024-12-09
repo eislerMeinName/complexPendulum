@@ -142,10 +142,11 @@ class Evaluator:
 
     def evalPWM(self) -> dict:
         """Evaluates the pwm signals."""
-        avg = np.mean(self.pwm)
-        maximum = np.max(np.abs(self.pwm))
-        minimum = np.min(np.abs(self.pwm))
-        deltas = [self.pwm[i+1] - self.pwm[i] for i in range(0, len(self.pwm)-1)]
+        pwm = self.pwm[0:-1]
+        avg = np.mean(np.abs(pwm))
+        maximum = np.max(np.abs(pwm))
+        minimum = np.min(np.abs(pwm))
+        deltas = [self.pwm[i+1] - self.pwm[i] for i in range(0, len(pwm)-1)]
         dmax = np.max(np.abs(np.array(deltas)))
         davg = np.mean(np.array(deltas))
         self.data["pwm"] = avg

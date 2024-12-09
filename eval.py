@@ -8,7 +8,7 @@ from stable_baselines3 import SAC, PPO
 
 from complexPendulum.agents import ProportionalAgent, LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import DirectQR1
+from complexPendulum.agents.neuralAgents import *
 from complexPendulum.assets import Setup1, Setup2, Setup3, Evaluator, ActionType, EvaluationDataType
 from complexPendulum.envs import ComplexPendulum
 
@@ -40,7 +40,7 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
     failtimes = []
 
     env = gym.make('complexPendulum-v0', gui=False, s0=None, friction=True,
-                   episode_len=10, actiontype=ActionType.GAIN, log=True,
+                   episode_len=10, actiontype=ActionType.DIRECT, log=True,
                    conditionReward=True)
 
     setups = [Setup1, Setup2, Setup3]
@@ -99,8 +99,8 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 
 if __name__ == "__main__":
-    agent = LQAgent(ComplexPendulum(Q=Setup1.Q, R=Setup1.R))
+    #agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
     #agent = NeuralAgent(nAgent3, None)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
-    #agent = NeuralAgent(DirectQR1, None)
-    run(10, agent)
+    agent = NeuralAgent(DirectQR2, None)
+    run(1000, agent)

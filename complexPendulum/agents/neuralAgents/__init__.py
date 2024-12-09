@@ -17,8 +17,16 @@ GainQR1best = {"Setup": 1, "Algo": "PPO", "Action": "Gain", "Constrained": True,
 GainQR2 = {"Setup": 2, "Algo": "PPO", "Action": "Gain", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/gain/QR2Gain_last.zip")}
 GAINQR2best = {"Setup": 2, "Algo": "PPO", "Action": "Gain", "Consrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/gain/QR2Gain_best.zip")}
 
-GainQR3 = {"Setup": 3, "Algo": "PPO", "Action": "Gain", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/gain/QR3gain_last.zip")}
-GainQR3best = {"Setup": 3, "Algo": "PPO", "Action": "Gain", "Constrained": True, "Agent": PPO.load8("complexPendulum/agents/neuralAgents/gain/QR3gain_best.zip")}
+GainQR3 = {"Setup": 3, "Algo": "PPO", "Action": "Gain", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/gain/QR3Gain_last.zip")}
+GainQR3best = {"Setup": 3, "Algo": "PPO", "Action": "Gain", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/gain/QR3Gain_best.zip")}
 
 
 #Baselined Models
+BaseQR1 = {"Setup": 1, "Algo": "PPO", "Action": "Base", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/base/QR1Base_last.zip")}
+BaseQR1best = {"Setup": 1, "Algo": "PPO", "Action": "Base", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/base/QR1Base_best.zip")}
+
+BaseQR2 = {"Setup": 2, "Algo": "PPO", "Action": "Base", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/base/QR2Base_last.zip")}
+BaseQR2best = {"Setup": 2, "Algo": "PPO", "Action": "Base", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/base/QR2Base_best.zip")}
+
+BaseQR3 = {"Setup": 3, "Algo": "PPO", "Action": "Base", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/base/QR3Base_last.zip")}
+BaseQR3best = {"Setup": 3, "Algo": "PPO", "Action": "Base", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/base/QR3Base_best.zip")}
