@@ -7,6 +7,7 @@ DirectQR1 = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True,
 #DirectQR2 = {"Setup": 2, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct_last.zip")}
 DirectQR2 = {"Setup": 2, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct_best.zip")}
 
+
 DirectQR2_1m = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct1m_last.zip")}
 DirectQR2_1m_best = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct1m_best.zip")}
 
