@@ -1,5 +1,3 @@
-from distutils.core import setup
-
 import numpy as np
 import gymnasium as gym
 from tqdm import tqdm
@@ -100,7 +98,9 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 if __name__ == "__main__":
     #agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
+    #print(agent.K)
+    #exit()
     #agent = NeuralAgent(nAgent3, None)
-    #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Base"}, LQAgent(ComplexPendulum(Q=Setup2.Q, R=Setup2.R)).K)
-    agent = NeuralAgent(DirectQR2, None)
+    #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Direct"}, None)
+    agent = NeuralAgent(DirectQR2_1m_best, None)
     run(1000, agent)

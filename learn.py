@@ -15,17 +15,17 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
 
 EPISODE_REWARD_THRESHOLD = 0
 
-DEFAULT_STEPS: int = 200000
+DEFAULT_STEPS: int = 1000000
 DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
-DEFAULT_SETUP: EvalSetup = Setup3
-DEFAULT_ACTIONTYPE: ActionType = ActionType.GAIN
+DEFAULT_SETUP: EvalSetup = Setup2
+DEFAULT_ACTIONTYPE: ActionType = ActionType.DIRECT
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
 DEFAULT_CONDITION: bool = True
-DEFAULT_ENV = "baselinePendulum-v0"
+DEFAULT_ENV = "directPendulum-v0"
 
 
 def run(steps: int = DEFAULT_STEPS,
@@ -60,7 +60,7 @@ def run(steps: int = DEFAULT_STEPS,
                 verbose=1
                 )
 
-    eval_env = make_vec_env(DEFAULT_ENV, env_kwargs=env_kwargs, n_envs=4, seed=0)
+    eval_env = make_vec_env(DEFAULT_ENV, env_kwargs=env_kwargs, n_envs=10, seed=0)
 
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=EPISODE_REWARD_THRESHOLD,
                                                      verbose=1)
