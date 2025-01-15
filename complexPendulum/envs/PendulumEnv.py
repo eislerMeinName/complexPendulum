@@ -137,7 +137,7 @@ class ComplexPendulum(gym.Env):
 
         state = self.state.reshape(1, -1).copy()
         state[0, 2] = np.arctan2(np.sin(state[0, 2]), np.cos(state[0, 2]))
-        if abs(state[0, 2]) > 0.3 or abs(self.state[0]) > 0.7 and self.conditionReward:
+        if (abs(state[0, 2]) > 0.3 or abs(self.state[0]) > 0.7) and self.conditionReward:
             return -1000
         elif self.rewardtype is RewardType.LQ:
             return -(state @ self.Q @ state.T + u * self.R * u)[0, 0]
