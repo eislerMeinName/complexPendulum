@@ -38,7 +38,7 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
     failtimes = []
 
     env = gym.make('complexPendulum-v0', gui=False, s0=None, friction=True,
-                   episode_len=10, actiontype=ActionType.DIRECT, log=True,
+                   episode_len=10, actiontype=ActionType.GAIN, log=True,
                    conditionReward=True)
 
     setups = [Setup1, Setup2, Setup3]
@@ -102,5 +102,5 @@ if __name__ == "__main__":
     #exit()
     #agent = NeuralAgent(nAgent3, None)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Direct"}, None)
-    agent = NeuralAgent(DirectQR2_1m_best, None)
+    agent = NeuralAgent(GainQR1, None)
     run(1000, agent)

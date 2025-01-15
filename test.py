@@ -5,7 +5,7 @@ from sympy.strategies.branch import condition
 
 from complexPendulum.agents import LQAgent, SwingUpAgent, CombinedAgent, ProportionalAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent1, nAgent2
+from complexPendulum.agents.neuralAgents import *
 from complexPendulum.assets import ActionType
 import time
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
                    conditionReward=False)
     lq = LQAgent(env.unwrapped)
     print(lq.K)
-    neural = NeuralAgent(nAgent2, None)
+    neural = NeuralAgent(DirectQR1, None)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)
 
