@@ -63,4 +63,5 @@ if __name__ == "__main__":
     plt.xlabel('training steps')
     plt.ylabel('return')
     plt.legend()
+    plt.xticks([50000, 100000, 150000, 200000])
     plt.show()

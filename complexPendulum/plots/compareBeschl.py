@@ -1,10 +1,35 @@
 import pandas as pd
 import numpy as np
-from sympy.physics.units import acceleration
 
-from complexPendulum.assets.Evaluator import loadLog
+#from complexPendulum.assets.Evaluator import loadLog
 import matplotlib.pyplot as plt
 
+def loadLog(path: str) -> tuple:
+    """Loading method that loads logged Data.
+    Input:
+        path: str
+            The path to the log file in csv format.
+
+    Return:
+        states: list[np.array]
+            The logged states relevant for evaluation.
+        pwm: list[float]
+            The logged pwm signals.
+        force: list[float]
+            The logged applied forces.
+    """
+
+    frame = pd.read_csv(path)
+    X = frame['X'].to_list()
+    Xdot = frame['Xdot'].to_list()
+    Theta = frame['Theta'].to_list()
+    Thetadot = frame['Thetadot'].to_list()
+    pwm = frame['pwm'].to_list()
+    force = frame['force'].to_list()
+    force.pop(-1)
+    pwm.pop(-1)
+    states = [np.array([[X[i], Xdot[i], Theta[i], Thetadot[i]]]) for i in range(0, len(X))]
+    return states, pwm, force, frame['Time'].to_list()
 
 def loadMatlabLog(path: str) -> tuple:
     """Loading method that loads logged MatlabData.
@@ -30,7 +55,8 @@ def loadMatlabLog(path: str) -> tuple:
 
 
 if __name__ == "__main__":
-
+    plt.rc('font', size=20)
+    plt.rcParams["figure.figsize"] = (20,10)
     statesM006, _, _, TimeM006 = loadMatlabLog("../data/acceleration/Beschl006.csv")
     statesM008, _, _, TimeM008 = loadMatlabLog("../data/acceleration/Beschl008.csv")
     statesM01, _, _, TimeM01 = loadMatlabLog('../data/acceleration/Beschl.csv')
@@ -68,14 +94,14 @@ if __name__ == "__main__":
 
     fig, axs = plt.subplots(2, 1)
     fig.tight_layout()
-    title: str = 'Comparison of Acceleration'
-    fig.suptitle(title, fontsize=15)
+    #title: str = 'Comparison of Acceleration'
+    #fig.suptitle(title, fontsize=15)
 
     dot = '\u0307'
     #axs[0].plot(TimeM006, XM006, c='b', label='RealWorld (0.06)')
     #axs[0].plot(TimeP006, XP006, '--', c='b', label='Simulation (0.06)')
-    axs[0].plot(TimeM008, XM008, c='g', label='RealWorld (0.08)')
-    axs[0].plot(TimeP008, XP008, '--', c='g', label='Simulation (0.08)')
+    l1 = axs[0].plot(TimeM008, XM008, c='g', label='RealWorld (0.08)')
+    l2 = axs[0].plot(TimeP008, XP008, '--', c='g', label='Simulation (0.08)')
 
     axs[0].plot(TimeM01, XM01, c='r', label='RealWorld (0.1)')
     axs[0].plot(TimeP01, XP01, '--', c='r', label='Simulation (0.1)')
@@ -109,6 +135,9 @@ if __name__ == "__main__":
     axs[1].set_xlim(0, 3)
 
     axs[0].legend()
-    axs[1].legend()
+    #fig.legend([l1, l2], labels=labels, 
+    #       loc="upper right") 
+    #axs[1].legend()
+    #plt.tight_layout()
     plt.show()
 

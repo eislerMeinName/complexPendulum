@@ -1,7 +1,34 @@
 import pandas as pd
 import numpy as np
-from complexPendulum.assets.Evaluator import loadLog
+#from complexPendulum.assets.Evaluator import loadLog
 import matplotlib.pyplot as plt
+
+def loadLog(path: str) -> tuple:
+    """Loading method that loads logged Data.
+    Input:
+        path: str
+            The path to the log file in csv format.
+
+    Return:
+        states: list[np.array]
+            The logged states relevant for evaluation.
+        pwm: list[float]
+            The logged pwm signals.
+        force: list[float]
+            The logged applied forces.
+    """
+
+    frame = pd.read_csv(path)
+    X = frame['X'].to_list()
+    Xdot = frame['Xdot'].to_list()
+    Theta = frame['Theta'].to_list()
+    Thetadot = frame['Thetadot'].to_list()
+    pwm = frame['pwm'].to_list()
+    force = frame['force'].to_list()
+    force.pop(-1)
+    pwm.pop(-1)
+    states = [np.array([[X[i], Xdot[i], Theta[i], Thetadot[i]]]) for i in range(0, len(X))]
+    return states, pwm, force, frame['Time'].to_list()
 
 
 def loadMatlabLog(path: str) -> tuple:
@@ -28,6 +55,8 @@ def loadMatlabLog(path: str) -> tuple:
 
 
 if __name__ == "__main__":
+    plt.rc('font', size=20)
+    plt.rcParams["figure.figsize"] = (20,3)
     statesM, pwmM, _, TimeM = loadMatlabLog('../data/step/Kontrolle.csv')
     statesP, pwmP, _, TimeP = loadLog('../data/step/stepsim.csv')
 
@@ -57,8 +86,8 @@ if __name__ == "__main__":
 
     fig, axs = plt.subplots(4, 1)
     fig.tight_layout()
-    title: str = 'Comparison of Step Response'
-    fig.suptitle(title, fontsize=15)
+    #title: str = 'Comparison of Step Response'
+    #fig.suptitle(title, fontsize=15)
 
     dot = '\u0307'
     axs[0].plot(TimeM, XM, c='r', label='RealWorld')
@@ -101,5 +130,6 @@ if __name__ == "__main__":
     axs[1].legend()
     axs[2].legend()
     axs[3].legend()
+    #plt.tight_layout()
 
     plt.show()
