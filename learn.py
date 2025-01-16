@@ -2,6 +2,7 @@ import argparse
 import gymnasium as gym
 import numpy as np
 import torch
+import pandas as pd
 
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.sac.policies import SACPolicy
@@ -12,20 +13,21 @@ from stable_baselines3.common.env_util import make_vec_env
 
 from complexPendulum.assets import ActionType, EvalSetup
 from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
+from complexPendulum.plots.s0 import calcS0
 
 EPISODE_REWARD_THRESHOLD = 0
 
-DEFAULT_STEPS: int = 1000000
+DEFAULT_STEPS: int = 200000
 DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
-DEFAULT_SETUP: EvalSetup = Setup2
+DEFAULT_SETUP: EvalSetup = Setup1
 DEFAULT_ACTIONTYPE: ActionType = ActionType.DIRECT
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
 DEFAULT_CONDITION: bool = True
-DEFAULT_ENV = "directPendulum-v0"
+DEFAULT_ENV = "directUPPendulum-v0"
 
 
 def run(steps: int = DEFAULT_STEPS,
@@ -39,13 +41,12 @@ def run(steps: int = DEFAULT_STEPS,
         name: str = DEFAULT_NAME,
         condition: bool = DEFAULT_CONDITION
         ) -> None:
-
     env_kwargs: dict = dict(frequency=frequency, episode_len=episode_len, path=path,
                             Q=setup.Q, R=setup.R,
                             rewardtype=setup.func, s0=s0,
                             friction=friction, log=False, conditionReward=condition)
 
-    train_env = make_vec_env(DEFAULT_ENV, n_envs=4, seed=0, env_kwargs=env_kwargs)
+    train_env = make_vec_env(DEFAULT_ENV, n_envs=10, seed=0, env_kwargs=env_kwargs)
 
     onpolicy_kwargs: dict = dict(activation_fn=torch.nn.ReLU,
                                  net_arch=dict(vf=[128, 64, 32], pi=[128, 64, 32]))

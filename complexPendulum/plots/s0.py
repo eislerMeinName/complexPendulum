@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 
-def calcS0(pd) -> dict:
+def calcS0(df) -> dict:
     """Mehhod that calculates the distribution based on a dataframe
     Input: 
-        pd: pandas dataframe
+        df: pandas dataframe
             The data.
 
     Returns:
@@ -16,14 +16,15 @@ def calcS0(pd) -> dict:
     si = ['x', 'xd', 't', 'td']
     val = {}
     for s in si:
-        apl = np.abs(pd['Links'][s])._append(np.abs(pd['Rechts'][s]))
+        apl = np.abs(df['Links'][s])._append(np.abs(df['Rechts'][s]))
         val[s] = (np.mean(apl), np.std(apl))
+
     return val
 
 if __name__ == "__main__":
     path: str = "../data/s0/s0.xlsx"
-    pd = pd.read_excel(path, None)
-    vals = calcS0(pd)
+    df = pd.read_excel(path, None)
+    vals = calcS0(df)
     print(vals['x'])
     print(vals['xd'])
     print(vals['t'])

@@ -1,5 +1,6 @@
 import numpy as np
 import gymnasium as gym
+import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from stable_baselines3 import SAC, PPO
@@ -9,7 +10,7 @@ from complexPendulum.agents.NeuralAgent import NeuralAgent
 from complexPendulum.agents.neuralAgents import *
 from complexPendulum.assets import Setup1, Setup2, Setup3, Evaluator, ActionType, EvaluationDataType
 from complexPendulum.envs import ComplexPendulum
-
+from complexPendulum.plots.s0 import calcS0
 
 def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(DirectQR1, None)) -> None:
 
@@ -36,10 +37,29 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
     failX = []
     failT = []
     failtimes = []
+    
+    #swingup s0
+    path: str = "complexPendulum/data/s0/s0.xlsx"
+    df = pd.read_excel(path, None)
+    vals = calcS0(df)
+    def sampleS0Swing() -> np.array:
+        c = np.random.choice([0, 1])
+        sign = np.array([-1, -1, -1, 1]) if c == 0 else np.array([1, 1, 1, -1])
+        s0 = np.array([np.random.normal(vals['x'][0], vals['x'][1]),
+                       np.random.normal(vals['xd'][0], vals['xd'][1]),
+                       np.random.normal(vals['t'][0], vals['t'][1]),
+                       np.random.normal(vals['td'][0], vals['td'][1])])
+        s0 = np.multiply(sign, s0)
+        return s0
 
-    env = gym.make('complexPendulum-v0', gui=False, s0=None, friction=True,
+    env = gym.make('complexPendulum-v0', gui=False, s0=s0, friction=True,
                    episode_len=10, actiontype=ActionType.GAIN, log=True,
                    conditionReward=True)
+
+    env.unwrapped.sampleS0 = sampleS0Swing
+    while True:
+        s, _ = env.reset()
+        input(s)
 
     setups = [Setup1, Setup2, Setup3]
 
@@ -88,19 +108,18 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
     print(failX)
     print(failT)
-    plt.scatter(failX, failT, c=failtimes)
-    plt.xlim(-0.5, 0.5)
-    plt.ylim(-0.3, 0.3)
-    plt.colorbar()
-    plt.show()
+    if not len(failX) == 0:
+        plt.scatter(failX, failT, c=failtimes)
+        plt.xlim(-0.5, 0.5)
+        plt.ylim(-0.3, 0.3)
+        plt.colorbar()
+        plt.show()
 
 
 
 if __name__ == "__main__":
-    #agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
+    agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
     #print(agent.K)
-    #exit()
-    #agent = NeuralAgent(nAgent3, None)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Direct"}, None)
-    agent = NeuralAgent(GainQR1, None)
-    run(1000, agent)
+    #agent = NeuralAgent(DirectQR1, None)
+    run(100, agent)

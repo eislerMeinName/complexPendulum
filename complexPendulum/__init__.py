@@ -24,3 +24,8 @@ gym.envs.register(
         id='easybaselinePendulum-v0',
         entry_point='complexPendulum.envs:EasyBaselinePendulum'
     )
+
+gym.envs.register(
+        id='directUPPendulum-v0', 
+        entry_point='complexPendulum.envs:DirectUpPendulum'
+    )

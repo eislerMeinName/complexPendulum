@@ -83,6 +83,17 @@ class ComplexPendulum(gym.Env):
         self.R = R
         self.t = np.linspace(0, 1/frequency, 2)
         self.conditionReward = conditionReward
+        
+        #if s0 is None:
+        #    self.state = self.sampleS0()
+        #    self.s0 = None
+        #elif type(s0) is np.array:
+        #    self.state = s0.copy()
+        #    self.s0 = s0.copy()
+        #else:
+        #    self.sampleS0 = s0
+        #    self.state = self.sampleS0()
+        #    self.s0 = None
 
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
