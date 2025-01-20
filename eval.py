@@ -52,15 +52,12 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
         s0 = np.multiply(sign, s0)
         return s0
 
-    env = gym.make('complexPendulum-v0', gui=False, s0=s0, friction=True,
-                   episode_len=10, actiontype=ActionType.GAIN, log=True,
+    env = gym.make('complexPendulum-v0', gui=False, s0=None, friction=True,
+                   episode_len=10, actiontype=ActionType.DIRECT, log=True,
                    conditionReward=True)
 
-    env.unwrapped.sampleS0 = sampleS0Swing
-    while True:
-        s, _ = env.reset()
-        input(s)
-
+    #env.unwrapped.sampleS0 = sampleS0Swing
+    
     setups = [Setup1, Setup2, Setup3]
 
     for i in tqdm(range(amount)):
@@ -118,8 +115,9 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 
 if __name__ == "__main__":
-    agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
+    #agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
     #print(agent.K)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Direct"}, None)
-    #agent = NeuralAgent(DirectQR1, None)
+    agent = NeuralAgent(DirectQR2UnCon_best, None)
     run(100, agent)
+

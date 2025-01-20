@@ -94,10 +94,10 @@ class ComplexPendulum(gym.Env):
         #    self.sampleS0 = s0
         #    self.state = self.sampleS0()
         #    self.s0 = None
-
+        
         self.state = self.sampleS0() if s0 is None else s0.copy()
         self.s0 = None if s0 is None else s0.copy()
-
+        
         pos: float = round(self.state[0] / self.params[8]) * self.params[8]
         angle: float = round(self.state[2] / self.params[9]) * self.params[9]
         self.last_state = np.array([pos, self.state[1], angle, self.state[3]])

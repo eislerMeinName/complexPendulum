@@ -72,6 +72,7 @@ class DirectUpPendulum(ComplexPendulum):
                        np.random.normal(vals[2][0], vals[2][1]),
                        np.random.normal(vals[3][0], vals[3][1])])
         s0 = np.multiply(sign, s0)
+        return s0
 
     def step(self, action: np.array) -> Tuple[np.array, float, bool, bool, dict]:
         """The step function simulates a single control step in the environment.

@@ -17,17 +17,17 @@ from complexPendulum.plots.s0 import calcS0
 
 EPISODE_REWARD_THRESHOLD = 0
 
-DEFAULT_STEPS: int = 200000
+DEFAULT_STEPS: int = 300000
 DEFAULT_FREQ: int = 100
 DEFAULT_EPISODE_LEN: float = 10
 DEFAULT_PATH: str = 'params.xml'
-DEFAULT_SETUP: EvalSetup = Setup1
+DEFAULT_SETUP: EvalSetup = Setup2
 DEFAULT_ACTIONTYPE: ActionType = ActionType.DIRECT
 DEFAULT_S0: np.array = None
 DEFAULT_FRICTION: bool = True
 DEFAULT_NAME: str = 'results/success_model.zip'
-DEFAULT_CONDITION: bool = True
-DEFAULT_ENV = "directUPPendulum-v0"
+DEFAULT_CONDITION: bool = False
+DEFAULT_ENV = "directPendulum-v0"
 
 
 def run(steps: int = DEFAULT_STEPS,
