@@ -1,8 +1,8 @@
 from complexPendulum.agents import NeuralAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent1, nAgent2, nAgent3, nAgent4
+from complexPendulum.agents.neuralAgents import *
 
 if __name__ == "__main__":
-    agent = NeuralAgent(nAgent3)
+    agent = NeuralAgent(DirectQR3, None)
     print(agent)
-    agent.saveMat("Setup2PPODirect.mat")
+    agent.saveMat("DirectQR3.mat")

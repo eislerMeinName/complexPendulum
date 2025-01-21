@@ -44,8 +44,11 @@ def actionplot(model1, model2, name1: str, name2: str) -> None:
     ax.set_ylabel('θ')
     ax.set_zlabel('a')
 
+    ax.view_init(elev=10., azim=-40)
     plt.legend()
-
+    
+    plt.xticks(np.arange(-0.4, 0.42, 0.4))
+    plt.yticks(np.array([-0.25, 0, 0.25]))
     plt.show()
 
 
@@ -53,4 +56,4 @@ if __name__ == "__main__":
     plt.rc('font', size=16)
     a1 = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
     a2 = NeuralAgent(DirectQR3, None)
-    actionplot(a1, a2, 'QR1', 'LQ1')
+    actionplot(a1, a2, 'LQ3', 'QR3')
