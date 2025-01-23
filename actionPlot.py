@@ -23,6 +23,7 @@ def actionplot(model1, model2, name1: str, name2: str) -> None:
     """
 
     fig = plt.figure()
+    #fig.tight_layout()
 
     ax = plt.axes(projection='3d')
 
@@ -37,23 +38,25 @@ def actionplot(model1, model2, name1: str, name2: str) -> None:
     Z1 = [np.clip(-model1.predict(np.array([xs[i], 0, ts[i], 0])) @ np.array([xs[i], 0, ts[i], 0]), -0.5, 0.5) for i in range(0, len(ts))]
     
     Z2 = [model2.predict(np.array([xs[i], 0, ts[i], 0]))[0] for i in range(0, len(ts))]
-    ax.plot_trisurf(xs, ts, Z1, edgecolor='none', color='g', label=name1)
-    ax.plot_trisurf(xs, ts, Z2, edgecolor='none', color='b', label=name2)
+    ax.plot_trisurf(xs, ts, Z1, edgecolor='none', color='tab:green', label=name1)
+    ax.plot_trisurf(xs, ts, Z2, edgecolor='none', color='tab:blue', label=name2)
 
     ax.set_xlabel('x')
     ax.set_ylabel('θ')
-    ax.set_zlabel('a')
+    ax.set_zlabel('pwm')
 
     ax.view_init(elev=10., azim=-40)
     plt.legend()
     
     plt.xticks(np.arange(-0.4, 0.42, 0.4))
     plt.yticks(np.array([-0.25, 0, 0.25]))
+    ax.set_zticks(np.array([-0.5, 0, 0.5]))
     plt.show()
 
 
 if __name__ == "__main__":
-    plt.rc('font', size=16)
+    plt.rc('font', size=13)
+    plt.rcParams["figure.figsize"] = (4,3)
     a1 = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
     a2 = NeuralAgent(DirectQR3, None)
     actionplot(a1, a2, 'LQ3', 'QR3')

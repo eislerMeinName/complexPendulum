@@ -53,7 +53,7 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
         return s0
 
     env = gym.make('complexPendulum-v0', gui=False, s0=None, friction=True,
-                   episode_len=10, actiontype=ActionType.DIRECT, log=True,
+                   episode_len=10, actiontype=ActionType.GAIN, log=True,
                    conditionReward=True)
 
     #env.unwrapped.sampleS0 = sampleS0Swing
@@ -115,9 +115,9 @@ def run(amount: int = 200, agent: NeuralAgent | ProportionalAgent = NeuralAgent(
 
 
 if __name__ == "__main__":
-    #agent = LQAgent(ComplexPendulum(Q=Setup3.Q, R=Setup3.R))
+    agent = LQAgent(ComplexPendulum(Q=Setup1.Q, R=Setup1.R))
     #print(agent.K)
     #agent = NeuralAgent({"Agent": PPO.load("results/best_model"), "Action": "Direct"}, None)
-    agent = NeuralAgent(DirectQR2UnCon_best, None)
+    #agent = NeuralAgent(DirectQR2UnCon_best, None)
     run(100, agent)
 
