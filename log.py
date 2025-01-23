@@ -13,7 +13,7 @@ from complexPendulum.assets import Setup1, Setup2, Setup3, Setup4, Setup5
 
 DEFAULT_STEPS: int = 100000
 DEFAULT_FREQ: int = 100
-DEFAULT_EPISODE_LEN: float = 10
+DEFAULT_EPISODE_LEN: float = 60
 DEFAULT_PATH: str = 'params.xml'
 DEFAULT_SETUP: EvalSetup = Setup1
 DEFAULT_S0= None
@@ -40,14 +40,14 @@ def run(frequency: float = DEFAULT_FREQ,
                         episode_len=episode_len, path=path,
                         Q=setup.Q, R=setup.R,
                         rewardtype=setup.func, s0=s0, gui=gui,
-                        friction=friction, log=log, render_mode="human", actiontype=ActionType.GAIN)
+                        friction=friction, log=log, render_mode="human", actiontype=ActionType.DIRECT)
 
     #agent = NeuralAgent({"Algo": "PPO", "Action": "Base" , "Agent": PPO.load(name)}, LQAgent(eval_env.unwrapped).K)
-    agent = LQAgent(eval_env.unwrapped)
+    #agent = LQAgent(eval_env.unwrapped)
     #a = ProportionalAgent(np.array([-1, -3.0256, -23.7068, -4.4886]))
     #swingup = SwingUpAgent(eval_env.unwrapped)
     #agent = CombinedAgent(swingup, a)
-    #agent = NeuralAgent(DirectQR1, None)
+    agent = NeuralAgent(DirectQR1, None)
 
     state, _ = eval_env.reset()
     done = False
@@ -64,7 +64,6 @@ def run(frequency: float = DEFAULT_FREQ,
     print(str(round(time.time() - t00, 5)) + 's')
     eval_env.unwrapped.stats()
     path = name.replace('results/', 'logs/')
-    print(path)
     eval_env.unwrapped.logger.write(path + ".csv")
     eval_env.close()
 

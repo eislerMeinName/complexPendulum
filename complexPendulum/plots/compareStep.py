@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-#from complexPendulum.assets.Evaluator import loadLog
 import matplotlib.pyplot as plt
 
 def loadLog(path: str) -> tuple:
@@ -29,7 +28,6 @@ def loadLog(path: str) -> tuple:
     pwm.pop(-1)
     states = [np.array([[X[i], Xdot[i], Theta[i], Thetadot[i]]]) for i in range(0, len(X))]
     return states, pwm, force, frame['Time'].to_list()
-
 
 def loadMatlabLog(path: str) -> tuple:
     """Loading method that loads logged MatlabData.
@@ -79,10 +77,16 @@ if __name__ == "__main__":
     plt.rc('font', size=13)
     plt.rcParams["figure.figsize"] = (5, 5)
     statesM, pwmM, _, TimeM = loadMatlabLog('../data/step/DirectQR1.csv')
-    statesP, pwmP, _, TimeP = loadLog('../data/step/DirectQR1Sim.csv')
+    statesP, pwmP, _, TimeP = loadLog('../data/step/DirectQR1Sim.csv') 
+    statesP2, pwmP2, _, TimeP2 = loadLog('../data/step/LQ1Sim.csv')
 
     time = 0
     index = 0
+
+    Q = np.eye(4)/100
+    R = np.eye(1)/100
+
+    rew1, rew2, rew3 = 0, 0, 0
 
     for i, s in enumerate(statesM):
         if abs(s[0, 2]) < 0.25:
@@ -90,7 +94,6 @@ if __name__ == "__main__":
             index = i
             break
     
-    print(statesM[i])
     statesM = statesM[i:]
     pwmM = pwmM[i:]
     TimeM = np.array(TimeM[i:]) - time
@@ -106,28 +109,34 @@ if __name__ == "__main__":
     ThetaP = [s[0, 2] for s in statesP]
     ThetadotP = [s[0, 3] for s in statesP]
 
+    XP2 = [s[0, 0] for s in statesP2]
+    XdotP2 = [s[0, 1] for s in statesP2]
+    ThetaP2 = [s[0, 2] for s in statesP2]
+    ThetadotP2 = [s[0, 3] for s in statesP2]
+
     fig, axs = plt.subplots(5, 1)
     #fig.tight_layout()
-    labels = ['DirectQR1 - Real World', 'DirectQR1 - Simulation']
+    labels = ['DirectQR1 - Real World', 'DirectQR1 - Simulation', 'LQ1 - Simulation']
     l1 = plotStep(XM, XdotM, ThetaM, ThetadotM, pwmM, TimeM, labels[0], 'tab:blue', 1, False, True, axs) 
     l2 = plotStep(XP, XdotP, ThetaP, ThetadotP, pwmP, TimeP, labels[1], 'tab:red', 1, True, True, axs)
+    l3 = plotStep(XP2, XdotP2, ThetaP2, ThetadotP2, pwmP2, TimeP2, labels[2], 'tab:green', 1, True, True, axs)
 
     dot = '\u0307'
     axs[0].set_xlabel('t [s]')
     axs[0].set_ylabel('X [m]')
-    maxX = max(XM) if abs(max(XM)) >= abs(min(XM)) else min(XM)
+    maxX = max(XP2) if abs(max(XP2)) >= abs(min(XP2)) else min(XP2)
     axs[0].set_ylim(-1.1 * abs(maxX), 1.1 * abs(maxX))
     axs[0].set_xlim(0, 30)
 
     axs[1].set_xlabel('t [s]')
     axs[1].set_ylabel('X' + dot + ' [m/s]')
-    maxX = max(XdotM) if abs(max(XdotM)) >= abs(min(XdotM)) else min(XdotM)
+    maxX = max(XdotP2) if abs(max(XdotP2)) >= abs(min(XdotP2)) else min(XdotP2)
     axs[1].set_ylim(-1.1 * abs(maxX), 1.1 * abs(maxX))
     axs[1].set_xlim(0, 30)
 
     axs[2].set_xlabel('t [s]')
     axs[2].set_ylabel(r'$\theta$')
-    axs[2].set_ylim(1.2*min(ThetaM), 1.2*max(np.array(ThetaM)))
+    axs[2].set_ylim(1.2*min(ThetaP2), 1.2*max(np.array(ThetaP2)))
     axs[2].set_xlim(0, 30)
 
     axs[3].set_xlabel('t [s]')
