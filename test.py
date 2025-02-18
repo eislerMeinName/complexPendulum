@@ -20,7 +20,6 @@ if __name__ == "__main__":
                    episode_len=30, Q=Q, R=R, render_mode="human", actiontype=ActionType.DIRECT,
                    conditionReward=False)
     lq = LQAgent(env.unwrapped)
-    print(lq.K)
     neural = NeuralAgent(DirectQR1, None)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, lq)

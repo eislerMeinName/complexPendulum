@@ -3,7 +3,7 @@ import numpy as np
 from stable_baselines3 import SAC
 import gymnasium as gym
 
-from complexPendulum.agents import SwingUpAgent, CombinedAgent
+from complexPendulum.agents import SwingUpAgent, CombinedAgent, LQAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
 from complexPendulum.agents.neuralAgents import *
 from complexPendulum.assets import Setup1 as setup
@@ -21,8 +21,9 @@ def run(name: str = DEFAULT_NAME) -> None:
                    friction=True, log=False, render_mode="rgb_array")
 
     neural = NeuralAgent(DirectQR1, None)
+    lq = LQAgent(env.unwrapped)
     swingup = SwingUpAgent(env.unwrapped)
-    agent = CombinedAgent(swingup, neural)
+    agent = CombinedAgent(swingup, lq)
 
     images = []
     obs, _ = env.reset()
@@ -33,7 +34,7 @@ def run(name: str = DEFAULT_NAME) -> None:
         obs, _, _, _, _ = env.step(action)
         img = env.render()
     
-    video_name: str = "res/DirectQR1"
+    video_name: str = "res/LQ1"
     imageio.mimsave(video_name + ".gif", [np.array(img) for i, img in enumerate(images) if i%5 == 0], fps=20, loop=0)
     imageio.mimsave(video_name + ".mp4", [np.array(img) for i, img in enumerate(images) ], fps=100)
 
