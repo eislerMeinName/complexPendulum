@@ -44,6 +44,7 @@ $ python3 evaltest.py
 It may be that some used libraries have to be used inside the environment in a different version. In addition, there is a known problem that may occure because GLIBCCXX is not found in the conda environment. This can be fixed by:
 ```bash
 $ ln -sf /usr/lib/libstdc++.so.6 /home/Username/anaconda3/envs/complexPendulum/bin/../lib/libstdc++.so.6
+```
 
 ## Environment
 The ComplexPendulum environment is multimodal, and uses a logger class.
