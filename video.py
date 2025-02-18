@@ -23,7 +23,7 @@ def run(name: str = DEFAULT_NAME) -> None:
     neural = NeuralAgent(DirectQR1, None)
     lq = LQAgent(env.unwrapped)
     swingup = SwingUpAgent(env.unwrapped)
-    agent = CombinedAgent(swingup, lq)
+    agent = CombinedAgent(swingup, neural)
 
     images = []
     obs, _ = env.reset()
@@ -34,7 +34,7 @@ def run(name: str = DEFAULT_NAME) -> None:
         obs, _, _, _, _ = env.step(action)
         img = env.render()
     
-    video_name: str = "res/LQ1"
+    video_name: str = "res/DirectQR1"
     imageio.mimsave(video_name + ".gif", [np.array(img) for i, img in enumerate(images) if i%5 == 0], fps=20, loop=0)
     imageio.mimsave(video_name + ".mp4", [np.array(img) for i, img in enumerate(images) ], fps=100)
 

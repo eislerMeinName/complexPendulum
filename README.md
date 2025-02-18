@@ -7,7 +7,7 @@ It aims at modelling real-world pendulum systems as accurate as possible includi
 
 
 <p align="center">
-  <img src="res/firstModel.gif">
+  <img src="res/comparison.gif">
 </p>
 
 
@@ -40,6 +40,10 @@ You can easily evaluate this step response via:
 ```bash
 $ python3 evaltest.py
 ```
+### Known Problems during Installation
+It may be that some used libraries have to be used inside the environment in a different version. In addition, there is a known problem that may occure because GLIBCCXX is not found in the conda environment. This can be fixed by:
+```bash
+$ ln -sf /usr/lib/libstdc++.so.6 /home/Username/anaconda3/envs/complexPendulum/bin/../lib/libstdc++.so.6
 
 ## Environment
 The ComplexPendulum environment is multimodal, and uses a logger class.
