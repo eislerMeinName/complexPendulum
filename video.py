@@ -5,8 +5,9 @@ import gymnasium as gym
 
 from complexPendulum.agents import SwingUpAgent, CombinedAgent
 from complexPendulum.agents.NeuralAgent import NeuralAgent
-from complexPendulum.agents.neuralAgents import nAgent2
+from complexPendulum.agents.neuralAgents import *
 from complexPendulum.assets import Setup1 as setup
+from complexPendulum.assets import ActionType
 
 DEFAULT_NAME: str = "results/best_model"
 DEFAULT_ENV = "complexPendulum-v0"
@@ -15,11 +16,11 @@ DEFAULT_ENV = "complexPendulum-v0"
 def run(name: str = DEFAULT_NAME) -> None:
     env = gym.make(DEFAULT_ENV, frequency=100,
                    episode_len=15, path="params.xml",
-                   Q=setup.Q, R=setup.R,
-                   rewardtype=setup.func, s0=np.array([0, 0, np.pi + 0.01, 0]), gui=True,
+                   Q=setup.Q, R=setup.R, actiontype=ActionType.DIRECT,
+                   rewardtype=setup.func, s0=np.array([0, 0, np.pi + 0.001, 0]), gui=True,
                    friction=True, log=False, render_mode="rgb_array")
 
-    neural = NeuralAgent(nAgent2, None)
+    neural = NeuralAgent(DirectQR1, None)
     swingup = SwingUpAgent(env.unwrapped)
     agent = CombinedAgent(swingup, neural)
 
@@ -31,8 +32,8 @@ def run(name: str = DEFAULT_NAME) -> None:
         action = agent.predict(obs)
         obs, _, _, _, _ = env.step(action)
         img = env.render()
-
-    video_name: str = "logs/firstModel"
+    
+    video_name: str = "res/DirectQR1"
     imageio.mimsave(video_name + ".gif", [np.array(img) for i, img in enumerate(images) if i%5 == 0], fps=20, loop=0)
     imageio.mimsave(video_name + ".mp4", [np.array(img) for i, img in enumerate(images) ], fps=100)
 

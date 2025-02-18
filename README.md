@@ -73,17 +73,20 @@ or write a new XML file as input to the environment.
 
 | parameter |                                  explanation                                   | standard value |
 |----------:|:------------------------------------------------------------------------------:|:--------------:|
-|        mp |                             Mass of pendulum [kg]                              |      0.09      |
-|         l | Distance between the mounting point and the center of mass of the pendulum [m] |     0.2376     |
-|         J |                           Moment of inertia  [kg m2]                           |   7.3404e-3    |
-|         m |                                Total mass [kg]                                 |     0.8633     |
-|        fp |               Friction coefficient for the pendulum [N m s/rad]                |   2.5014e-4    |
-|        fc |                   Friction coefficient for the cart [N s/m]                    |      0.5       |
+|        mp |                             Mass of pendulum [kg]                              |      0.097     |
+|        mc |                           Mass of the cart [kg]                                | 0.45           |
+|         l | Distance between the mounting point and the center of mass of the pendulum [m] |     0.2545     |
+|         J |                           Moment of inertia  [kg m2]                           |   0.0087879    |
+|         m |                                Total mass [kg]                                 |     0.82       |
+| M1        |   First polynomial coefficient of pwm to force fit.                            | 11.16          |
+|M0         | Polynomial offset coefficient of pwm to force fit.                             |-0.22           |
+|        ep |       Viscous friction coefficient for the pendulum [N m s/rad]                |   2.19e-4      |
+|        ec |                   Friction coefficient for the cart [N s/m]                    |      0.82      |
+|muc        | Coulomb friction coefficient of cart                                           |  0.066         |
+|mus        | Static friction coefficient multiplied with normal force [N]                   | 0.5            |
 |         g |                       Gravitational acceleration [m/s2]                        |      9.81      |
-|         M |                          PWM to Force coefficient [N]                          |  11.70903084   |
-|        Fs |                        Static Friction coefficient [N]                         |  0.292725771   |
-|    xquant |                          Quantization of encoder [m]                           |   5.7373e-5    |
-| thetaquant|                       Quantization of angle resolution                         |   0.001534     |
+|    qx     |                          Quantization of encoder [m]                           |   5.7373e-5    |
+| qt        |                       Quantization of angle resolution                         |   0.001534     |
 
 ### ActionTypes
 The ActionType models the action of the agent.

@@ -23,7 +23,6 @@ def actionplot(model1, model2, name1: str, name2: str) -> None:
     """
 
     fig = plt.figure()
-    #fig.tight_layout()
 
     ax = plt.axes(projection='3d')
 

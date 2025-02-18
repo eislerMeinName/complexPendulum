@@ -14,7 +14,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 dependencies = ["pandas>=2.2.2", "matplotlib>=3.7.2", "numpy==1.24.0", "scipy==1.10.0",
-  "pygame>=2.5.0", "stable-baselines3>=2.0.0", "control", "tensorboard", "tqdm", "imageio"]
+  "pygame>=2.5.0", "stable-baselines3>=2.0.0", "control", "tensorboard", "tqdm", "imageio", "imageio[ffmpeg]", "openpyxl"]
 
 [tool.setuptools]
 py-modules = []

@@ -2,21 +2,10 @@ from stable_baselines3 import SAC, PPO
 
 #Direct Models
 DirectQR1 = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR1Direct_last.zip")}
-#DirectQR1best = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR1Direct_best.zip")}
 
-DirectQR1UnCon = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": False, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR1_noCon_last.zip")}
-DirectQR1UnCon_best = {"Setup":1, "Algo": "PPO", "Action": "Direct", "Constrained": False, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR1_noCon_best.zip")}
-
-#DirectQR2 = {"Setup": 2, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct_last.zip")}
 DirectQR2 = {"Setup": 2, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct_best.zip")}
 
-#DirectQR2UnCon = {"Setup": 2, "Algo": "PPO", "Action": "Direct", "Contrained": "False", "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2_noCon_last.zip")}
-
-#DirectQR2_1m = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct1m_last.zip")}
-#DirectQR2_1m_best = {"Setup": 1, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR2Direct1m_best.zip")}
-
 DirectQR3 = {"Setup": 3, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR3Direct_last.zip")}
-DirectQR3_best = {"Setup": 3, "Algo": "PPO", "Action": "Direct", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/direct/QR3Direct_best.zip")}
 
 #Gain Models
 GainQR1 = {"Setup": 1, "Algo": "PPO", "Action": "Gain", "Constrained": True, "Agent": PPO.load("complexPendulum/agents/neuralAgents/gain/QR1Gain_last.zip")}

@@ -47,6 +47,17 @@ def simEpisode(model: NeuralAgent | LQAgent, actiontype: ActionType, s0: np.arra
     return comRew
 
 def rewPlot2d(model: NeuralAgent | LQAgent, actiontype: ActionType, name: str) -> None:
+    """Method that plots the reward in 2D
+
+    Inputs:
+        model: NeuralAgent | LQAgent
+            The model to be evaluated.
+        actiontype: ActionType
+            The type of the action.
+        name: str
+            The label of the model in the plot
+
+    """
     
     theta = np.arange(-0.25, 0.25, 0.01)
     x = np.arange(-0.2, 0.2, 0.01)

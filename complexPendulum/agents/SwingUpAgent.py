@@ -6,7 +6,7 @@ class SwingUpAgent:
     """Implements a SwingUpController."""
 
     def __init__(self, env: ComplexPendulum,
-                 ksu: float = 1.3, kcw: float = 3,
+                 ksu: float = 1.4, kcw: float = 3,
                  kvw: float = 3, kem: float = 7,
                  eta: float = 1.05, E0: float = 0.05,
                  xmax: float = 0.4, vmax: float = 5,

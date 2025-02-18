@@ -6,6 +6,7 @@
 /complexPendulum/__pycache__
 /complexPendulum/agents/neuralAgents/__pycache__
 /complexPendulum/envs/__pycache__
+/complexPendulum/plots/__pycache__
 /complexPendulum.egg-info/
 /logs/
 /results/

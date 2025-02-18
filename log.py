@@ -42,11 +42,6 @@ def run(frequency: float = DEFAULT_FREQ,
                         rewardtype=setup.func, s0=s0, gui=gui,
                         friction=friction, log=log, render_mode="human", actiontype=ActionType.DIRECT)
 
-    #agent = NeuralAgent({"Algo": "PPO", "Action": "Base" , "Agent": PPO.load(name)}, LQAgent(eval_env.unwrapped).K)
-    #agent = LQAgent(eval_env.unwrapped)
-    #a = ProportionalAgent(np.array([-1, -3.0256, -23.7068, -4.4886]))
-    #swingup = SwingUpAgent(eval_env.unwrapped)
-    #agent = CombinedAgent(swingup, a)
     agent = NeuralAgent(DirectQR1, None)
 
     state, _ = eval_env.reset()
